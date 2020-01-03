@@ -1,0 +1,13 @@
+base_url: http://adriantombu.github.io/orion/
+site_name: Orion
+theme: orion
+
+robots: index, follow
+
+opengraph:
+  type: article
+
+twitter:
+  card: summary
+  creator: adriantombu
+  site: adriantombu

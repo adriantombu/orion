@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="og:title" content="{{.Title}}" />
+    <meta name="og:url" content="{{.Canonical}}" />
+    <meta name="og:site_name" content="{{.SiteName}}" />
+
+    {{ if .FrontMatter.Description }}
+      <meta name="description" content="{{.FrontMatter.Description}}" />
+      <meta name="og:description" content="{{.FrontMatter.Description}}" />
+    {{ end }}
+
+    {{ if .FrontMatter.Robots }}
+      <meta name="robots" content="{{.FrontMatter.Robots}}" />
+    {{ end }}
+
+    {{ if .FrontMatter.OpenGraph.Type }}
+      <meta name="og:type" content="{{.FrontMatter.OpenGraph.Type}}" />
+    {{ end }}
+
+    {{ if .FrontMatter.OpenGraph.Image }}
+      <meta name="og:image" content="{{.FrontMatter.OpenGraph.Image}}" />
+    {{ end }}
+
+    {{ if .FrontMatter.Twitter.Card }}
+      <meta name="twitter:card" content="{{.FrontMatter.Twitter.Card}}" />
+    {{ end }}
+
+    {{ if .FrontMatter.Twitter.Site }}
+      <meta name="twitter:site" content="@{{.FrontMatter.Twitter.Site}}" />
+    {{ end }}
+
+    {{ if .FrontMatter.Twitter.Creator }}
+      <meta name="twitter:creator" content="@{{.FrontMatter.Twitter.Creator}}" />
+    {{ end }}
+
+    <title>{{.Title}} - {{.SiteName}}</title>
+
+    <link rel="icon" href="./favicon.png" />
+    <link href="./style.css" rel="stylesheet" type="text/css" />
+    <link rel="canonical" href="{{.Canonical}}" />
+  </head>
+
+  <body>
+    <header>
+      <nav><a href="/">Orion</a></nav>
+    </header>
+
+    <article>
+      {{.Content}}
+    </article>
+
+    <footer>
+      <nav>
+        {{ if .Pagination.PrevTitle }}
+          <p><a href="{{.Pagination.PrevPath}}">&lt;&lt; {{.Pagination.PrevTitle}}</a></p>
+        {{ end }}
+
+        {{ if .Pagination.NextTitle }}
+          <p><a href="{{.Pagination.NextPath}}">{{.Pagination.NextTitle}} &gt;&gt;</a></p>
+        {{ end }}
+      </nav>
+    </footer>
+  </body>
+</html>
