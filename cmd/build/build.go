@@ -270,7 +270,7 @@ func writeArticles(articles []string, i int) error {
 }
 
 func copyAssets() error {
-	if err := copy.Copy(filepath.Join(themePath, "favicon.ico"), filepath.Join(buildPath, "favicon.ico")); err != nil {
+	if err := copy.Copy(filepath.Join(themePath, "favicon.png"), filepath.Join(buildPath, "favicon.png")); err != nil {
 		return err
 	}
 
