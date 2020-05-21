@@ -1,6 +1,7 @@
 ---
 title: A markdown demo
 description: Discover how to write your articles in markdown
+published_at: 2019-12-31
 ---
 
 ### Headings

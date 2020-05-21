@@ -31,6 +31,7 @@ import (
 var baseArticle = `---
 title: My great title
 description: This is a small summary of my article
+published_at: 2020-05-21
 slug: %s
 ---
 

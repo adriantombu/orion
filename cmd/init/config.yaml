@@ -1,5 +1,6 @@
 base_url: http://adriantombu.github.io/orion/
 site_name: Orion
+description: A simple static blog generator made with Go
 theme: orion
 build_path: ./public
 

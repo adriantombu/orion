@@ -19,11 +19,10 @@ package cmd
 import (
 	"net/http"
 
-	"github.com/spf13/viper"
-
 	"github.com/adriantombu/orion/cmd/build"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 func init() {

@@ -47,6 +47,7 @@ type frontMatter struct {
 	Slug        string `yaml:"slug"`
 	Canonical   string `yaml:"canonical"`
 	Robots      string `yaml:"robots"`
+	PublishedAt string `yaml:"published_at"`
 
 	OpenGraph struct {
 		Type  string `yaml:"type"`
@@ -58,6 +59,23 @@ type frontMatter struct {
 		Site    string `yaml:"site"`
 		Creator string `yaml:"creator"`
 	}
+}
+
+type rss struct {
+	Version       string `xml:"version,attr"`
+	Title         string `xml:"channel>title"`
+	Link          string `xml:"channel>link"`
+	Description   string `xml:"channel>description"`
+	LastBuildDate string `xml:"channel>lastBuildDate"`
+
+	Item []rssItem `xml:"channel>item"`
+}
+
+type rssItem struct {
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	Description string `xml:"description"`
+	PubDate     string `xml:"pubDate"`
 }
 
 func init() {

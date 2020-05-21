@@ -15,11 +15,10 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/spf13/viper"
-
 	"github.com/fatih/color"
 	"github.com/gomarkdown/markdown"
 	"github.com/otiai10/copy"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
@@ -50,6 +49,10 @@ func Run() error {
 	}
 
 	if err := generateSitemap(articles); err != nil {
+		return err
+	}
+
+	if err := generateRss(articles); err != nil {
 		return err
 	}
 
@@ -328,6 +331,47 @@ func generateSitemap(articles []string) error {
 	sitemap := []byte(xml.Header + string(data))
 
 	if err := ioutil.WriteFile(filepath.Join(buildPath, "sitemap.xml"), sitemap, 0644); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func generateRss(articles []string) error {
+	rssStruct := &rss{
+		Version:       "2.0",
+		Title:         viper.GetString("site_name"),
+		Link:          viper.GetString("base_url"),
+		Description:   viper.GetString("description"),
+		LastBuildDate: time.Now().Format(time.RFC1123Z),
+	}
+
+	for i := 0; i < len(articles); i++ {
+		file := articles[i]
+		filename := strings.Replace(file, ".md", ".html", 1)
+
+		fm, html, err := getHTML(file)
+		if err != nil {
+			return err
+		}
+
+		publishedAt, errDate := time.Parse("2006-01-02", fm.PublishedAt)
+		if errDate != nil {
+			return errDate
+		}
+
+		rssStruct.Item = append(rssStruct.Item, rssItem{
+			Title:       fm.Title,
+			Description: html,
+			Link:        viper.GetString("base_url") + filename,
+			PubDate:     publishedAt.Format(time.RFC1123Z),
+		})
+	}
+
+	data, _ := xml.MarshalIndent(rssStruct, "", "    ")
+	rssFeed := []byte(xml.Header + string(data))
+
+	if err := ioutil.WriteFile(filepath.Join(buildPath, "rss.xml"), rssFeed, 0644); err != nil {
 		return err
 	}
 
