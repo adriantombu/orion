@@ -5,10 +5,10 @@ import (
 )
 
 var start time.Time
-var buildPath = "./public"
 var articlesPath = "./articles"
 var staticPath = "./static"
 var themePath string
+var buildPath string
 
 type templateData struct {
 	Title       string

@@ -19,6 +19,8 @@ package cmd
 import (
 	"net/http"
 
+	"github.com/spf13/viper"
+
 	"github.com/adriantombu/orion/cmd/build"
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -45,7 +47,12 @@ func serve(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	http.Handle("/", http.FileServer(http.Dir("./public")))
+	buildPath := viper.GetString("build_path")
+	if buildPath == "" {
+		buildPath = "./public"
+	}
+
+	http.Handle("/", http.FileServer(http.Dir(buildPath)))
 
 	color.Green("You can access your blog on http://localhost:%s", port)
 

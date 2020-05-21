@@ -25,6 +25,10 @@ import (
 
 func Run() error {
 	themePath = fmt.Sprintf("./themes/%s", viper.GetString("theme"))
+	buildPath = viper.GetString("build_path")
+	if buildPath == "" {
+		buildPath = "./public"
+	}
 
 	if err := resetBuildDirectory(); err != nil {
 		return err

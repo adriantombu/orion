@@ -1,6 +1,7 @@
 base_url: http://adriantombu.github.io/orion/
 site_name: Orion
 theme: orion
+build_path: ./public
 
 robots: index, follow
 
