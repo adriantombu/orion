@@ -75,6 +75,7 @@ type rssItem struct {
 	Title       string `xml:"title"`
 	Link        string `xml:"link"`
 	Description string `xml:"description"`
+	Image       string `xml:"image"`
 	PubDate     string `xml:"pubDate"`
 }
 

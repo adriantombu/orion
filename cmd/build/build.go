@@ -364,6 +364,7 @@ func generateRss(articles []string) error {
 			Title:       fm.Title,
 			Description: html,
 			Link:        viper.GetString("base_url") + filename,
+			Image:       fm.OpenGraph.Image,
 			PubDate:     publishedAt.Format(time.RFC1123Z),
 		})
 	}
