@@ -26,21 +26,6 @@ type paginationData struct {
 	NextPath  string
 }
 
-type urlSet struct {
-	XMLName  string `xml:"urlset"`
-	Xmlns    string `xml:"xmlns,attr"`
-	XmlnsXsi string `xml:"xmlns:xsi,attr"`
-	Xsi      string `xml:"xsi:schemaLocation,attr"`
-	Urls     []url  `xml:"url"`
-}
-
-type url struct {
-	XMLName  string `xml:"url"`
-	Loc      string `xml:"loc"`
-	LastMod  string `xml:"lastmod"`
-	Priority string `xml:"priority"`
-}
-
 type frontMatter struct {
 	Title       string `yaml:"title"`
 	Description string `yaml:"description"`
@@ -59,24 +44,6 @@ type frontMatter struct {
 		Site    string `yaml:"site"`
 		Creator string `yaml:"creator"`
 	}
-}
-
-type rss struct {
-	Version       string `xml:"version,attr"`
-	Title         string `xml:"channel>title"`
-	Link          string `xml:"channel>link"`
-	Description   string `xml:"channel>description"`
-	LastBuildDate string `xml:"channel>lastBuildDate"`
-
-	Item []rssItem `xml:"channel>item"`
-}
-
-type rssItem struct {
-	Title       string `xml:"title"`
-	Link        string `xml:"link"`
-	Description string `xml:"description"`
-	Image       string `xml:"image"`
-	PubDate     string `xml:"pubDate"`
 }
 
 func init() {

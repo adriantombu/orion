@@ -2,7 +2,6 @@ package build
 
 import (
 	"bytes"
-	"encoding/xml"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -17,7 +16,6 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/gomarkdown/markdown"
-	"github.com/otiai10/copy"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
@@ -270,109 +268,6 @@ func writeArticles(articles []string, i int) error {
 	}
 
 	if err := ioutil.WriteFile(filepath.Join(buildPath, filename), []byte(page), 0755); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func copyAssets() error {
-	if err := copy.Copy(filepath.Join(themePath, "favicon.png"), filepath.Join(buildPath, "favicon.png")); err != nil {
-		return err
-	}
-
-	if err := copy.Copy(filepath.Join(themePath, "style.css"), filepath.Join(buildPath, "style.css")); err != nil {
-		return err
-	}
-
-	if err := copy.Copy(staticPath, buildPath); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func generateSitemap(articles []string) error {
-	urlSet := &urlSet{
-		Xmlns:    "http://www.sitemaps.org/schemas/sitemap/0.9",
-		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
-		Xsi:      "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd",
-	}
-
-	priority := 1.00
-
-	for i := 0; i < len(articles); i++ {
-		file := articles[i]
-		filename := strings.Replace(file, ".md", ".html", 1)
-
-		fileStat, err := os.Stat(filepath.Join(articlesPath, file))
-		if err != nil {
-			return err
-		}
-
-		if i == 0 {
-			urlSet.Urls = append(urlSet.Urls, url{
-				Loc:      viper.GetString("base_url") + "index.html",
-				LastMod:  fileStat.ModTime().Format(time.RFC3339),
-				Priority: fmt.Sprintf("%.2f", priority),
-			})
-		}
-
-		urlSet.Urls = append(urlSet.Urls, url{
-			Loc:      viper.GetString("base_url") + filename,
-			LastMod:  fileStat.ModTime().Format(time.RFC3339),
-			Priority: fmt.Sprintf("%.2f", priority),
-		})
-
-		priority = priority * 0.8
-	}
-
-	data, _ := xml.MarshalIndent(urlSet, "", "    ")
-	sitemap := []byte(xml.Header + string(data))
-
-	if err := ioutil.WriteFile(filepath.Join(buildPath, "sitemap.xml"), sitemap, 0644); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func generateRss(articles []string) error {
-	rssStruct := &rss{
-		Version:       "2.0",
-		Title:         viper.GetString("site_name"),
-		Link:          viper.GetString("base_url"),
-		Description:   viper.GetString("description"),
-		LastBuildDate: time.Now().Format(time.RFC1123Z),
-	}
-
-	for i := 0; i < len(articles); i++ {
-		file := articles[i]
-		filename := strings.Replace(file, ".md", ".html", 1)
-
-		fm, html, err := getHTML(file)
-		if err != nil {
-			return err
-		}
-
-		publishedAt, errDate := time.Parse("2006-01-02", fm.PublishedAt)
-		if errDate != nil {
-			return errDate
-		}
-
-		rssStruct.Item = append(rssStruct.Item, rssItem{
-			Title:       fm.Title,
-			Description: html,
-			Link:        viper.GetString("base_url") + filename,
-			Image:       fm.OpenGraph.Image,
-			PubDate:     publishedAt.Format(time.RFC1123Z),
-		})
-	}
-
-	data, _ := xml.MarshalIndent(rssStruct, "", "    ")
-	rssFeed := []byte(xml.Header + string(data))
-
-	if err := ioutil.WriteFile(filepath.Join(buildPath, "rss.xml"), rssFeed, 0644); err != nil {
 		return err
 	}
 

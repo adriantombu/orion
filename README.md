@@ -50,6 +50,7 @@ description: This is a small summary of my article
 slug: my-super-slug
 canonical:
 robots:
+published_at:
 
 opengraph:
     type:
@@ -63,6 +64,13 @@ twitter:
 ---
 
 The actual markdown content
+```
+
+### How to build and package the assets
+
+```
+chmod +X ./scripts/build.sh
+./scripts/build.sh
 ```
 
 ### Credits 

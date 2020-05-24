@@ -1,5 +1,7 @@
 #!/bin/bash
 
+go build
+
 # Packages the init files from /cmd/init
 pkger -o cmd
 
