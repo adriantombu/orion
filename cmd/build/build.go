@@ -40,26 +40,14 @@ func Run() error {
 	var wg sync.WaitGroup
 	wg.Add(len(articles))
 	for i := 0; i < len(articles); i++ {
-		if err := writeArticle(articles, i, &wg); err != nil {
-			return err
-		}
+		go writeArticle(articles, i, &wg)
 	}
 
-	if err := writeIndex(articles); err != nil {
-		return err
-	}
-
-	if err := copyAssets(); err != nil {
-		return err
-	}
-
-	if err := generateSitemap(articles); err != nil {
-		return err
-	}
-
-	if err := generateRss(articles); err != nil {
-		return err
-	}
+	wg.Add(4)
+	go writeIndex(articles, &wg)
+	go copyAssets(&wg)
+	go generateSitemap(articles, &wg)
+	go generateRss(articles, &wg)
 
 	wg.Wait()
 
@@ -230,15 +218,17 @@ func getPagination(files []string, current int) (paginationData, error) {
 	return data, nil
 }
 
-func writeArticle(articles []string, i int, wg *sync.WaitGroup) error {
+func writeArticle(articles []string, i int, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	file := articles[i]
 
 	color.Magenta("Generating file %s...", file)
 
 	fm, html, err := getHTML(file)
 	if err != nil {
-		return err
+		color.Red(err.Error())
+		return
 	}
 
 	if len(fm.Description) > 160 {
@@ -247,7 +237,8 @@ func writeArticle(articles []string, i int, wg *sync.WaitGroup) error {
 
 	title, errT := getTitle(fm, html)
 	if errT != nil {
-		return errT
+		color.Red(errT.Error())
+		return
 	}
 
 	if len(title) > 70 {
@@ -256,7 +247,8 @@ func writeArticle(articles []string, i int, wg *sync.WaitGroup) error {
 
 	pagination, errP := getPagination(articles, i)
 	if errP != nil {
-		return errP
+		color.Red(errP.Error())
+		return
 	}
 
 	filename := strings.Replace(file, ".md", ".html", 1)
@@ -266,13 +258,14 @@ func writeArticle(articles []string, i int, wg *sync.WaitGroup) error {
 	page := getPage(html, title, pagination, filename, fm)
 
 	if err := ioutil.WriteFile(filepath.Join(buildPath, filename), []byte(page), 0755); err != nil {
-		return err
+		color.Red(err.Error())
+		return
 	}
-
-	return nil
 }
 
-func writeIndex(articles []string) error {
+func writeIndex(articles []string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	color.Magenta("Generating file index.html...")
 
 	var files []frontMatter
@@ -281,7 +274,8 @@ func writeIndex(articles []string) error {
 
 		fm, _, err := getHTML(file)
 		if err != nil {
-			return err
+			color.Red(err.Error())
+			return
 		}
 
 		fm.Slug = viper.GetString("base_url") + strings.Replace(file, ".md", ".html", 1)
@@ -290,7 +284,8 @@ func writeIndex(articles []string) error {
 
 	t, err := template.ParseFiles(filepath.Join(themePath, "index.html"))
 	if err != nil {
-		log.Fatal(err)
+		color.Red(err.Error())
+		return
 	}
 
 	var tpl bytes.Buffer
@@ -301,14 +296,14 @@ func writeIndex(articles []string) error {
 		Articles:    files,
 	})
 	if err != nil {
-		log.Fatal(err)
+		color.Red(err.Error())
+		return
 	}
 
 	page := tpl.String()
 
 	if err := ioutil.WriteFile(filepath.Join(buildPath, "index.html"), []byte(page), 0755); err != nil {
-		return err
+		color.Red(err.Error())
+		return
 	}
-
-	return nil
 }

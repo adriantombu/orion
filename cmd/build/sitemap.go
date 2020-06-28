@@ -7,8 +7,10 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/spf13/viper"
 )
 
@@ -27,7 +29,9 @@ type url struct {
 	Priority string `xml:"priority"`
 }
 
-func generateSitemap(articles []string) error {
+func generateSitemap(articles []string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	urlSet := &urlSet{
 		Xmlns:    "http://www.sitemaps.org/schemas/sitemap/0.9",
 		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
@@ -42,7 +46,8 @@ func generateSitemap(articles []string) error {
 
 		fileStat, err := os.Stat(filepath.Join(articlesPath, file))
 		if err != nil {
-			return err
+			color.Red(err.Error())
+			return
 		}
 
 		if i == 0 {
@@ -66,8 +71,7 @@ func generateSitemap(articles []string) error {
 	sitemap := []byte(xml.Header + string(data))
 
 	if err := ioutil.WriteFile(filepath.Join(buildPath, "sitemap.xml"), sitemap, 0644); err != nil {
-		return err
+		color.Red(err.Error())
+		return
 	}
-
-	return nil
 }

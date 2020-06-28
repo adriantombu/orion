@@ -5,8 +5,10 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/spf13/viper"
 )
 
@@ -28,7 +30,9 @@ type rssItem struct {
 	PubDate     string `xml:"pubDate"`
 }
 
-func generateRss(articles []string) error {
+func generateRss(articles []string, wg *sync.WaitGroup) {
+	defer wg.Done()
+
 	rssStruct := &rss{
 		Version:       "2.0",
 		Title:         viper.GetString("site_name"),
@@ -43,12 +47,14 @@ func generateRss(articles []string) error {
 
 		fm, html, err := getHTML(file)
 		if err != nil {
-			return err
+			color.Red(err.Error())
+			return
 		}
 
 		publishedAt, errDate := time.Parse("2006-01-02", fm.PublishedAt)
 		if errDate != nil {
-			return errDate
+			color.Red(errDate.Error())
+			return
 		}
 
 		rssStruct.Item = append(rssStruct.Item, rssItem{
@@ -64,8 +70,7 @@ func generateRss(articles []string) error {
 	rssFeed := []byte(xml.Header + string(data))
 
 	if err := ioutil.WriteFile(filepath.Join(buildPath, "rss.xml"), rssFeed, 0644); err != nil {
-		return err
+		color.Red(err.Error())
+		return
 	}
-
-	return nil
 }
