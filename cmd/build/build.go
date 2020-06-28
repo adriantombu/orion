@@ -210,10 +210,6 @@ func getPagination(files []string, current int) (paginationData, error) {
 
 		data.PrevTitle = prevTitle
 		data.PrevPath = strings.Replace(files[current-1], ".md", ".html", 1)
-
-		if current-1 == 0 {
-			data.PrevPath = "index.html"
-		}
 	}
 
 	if current != len(files)-1 && current+1 <= len(files)-1 {
