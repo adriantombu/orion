@@ -11,31 +11,31 @@
     {{ if .FrontMatter.Description }}
       <meta name="description" content="{{.FrontMatter.Description}}" />
       <meta name="og:description" content="{{.FrontMatter.Description}}" />
-    {{ end }}
+    {{- end }}
 
     {{ if .FrontMatter.Robots }}
       <meta name="robots" content="{{.FrontMatter.Robots}}" />
-    {{ end }}
+    {{- end }}
 
     {{ if .FrontMatter.OpenGraph.Type }}
       <meta name="og:type" content="{{.FrontMatter.OpenGraph.Type}}" />
-    {{ end }}
+    {{- end }}
 
     {{ if .FrontMatter.OpenGraph.Image }}
       <meta name="og:image" content="{{.FrontMatter.OpenGraph.Image}}" />
-    {{ end }}
+    {{- end }}
 
     {{ if .FrontMatter.Twitter.Card }}
       <meta name="twitter:card" content="{{.FrontMatter.Twitter.Card}}" />
-    {{ end }}
+    {{- end }}
 
     {{ if .FrontMatter.Twitter.Site }}
       <meta name="twitter:site" content="@{{.FrontMatter.Twitter.Site}}" />
-    {{ end }}
+    {{- end }}
 
     {{ if .FrontMatter.Twitter.Creator }}
       <meta name="twitter:creator" content="@{{.FrontMatter.Twitter.Creator}}" />
-    {{ end }}
+    {{- end }}
 
     <title>{{.Title}} - {{.SiteName}}</title>
 
@@ -58,11 +58,11 @@
       <nav>
         {{ if .Pagination.PrevTitle }}
           <p><a href="{{.Pagination.PrevPath}}">&lt;&lt; {{.Pagination.PrevTitle}}</a></p>
-        {{ end }}
+        {{- end }}
 
         {{ if .Pagination.NextTitle }}
           <p><a href="{{.Pagination.NextPath}}">{{.Pagination.NextTitle}} &gt;&gt;</a></p>
-        {{ end }}
+        {{- end }}
       </nav>
     </footer>
   </body>

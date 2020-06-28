@@ -19,6 +19,13 @@ type templateData struct {
 	FrontMatter frontMatter
 }
 
+type templateIndexData struct {
+	Title       string
+	Description string
+	Canonical   string
+	Articles    []frontMatter
+}
+
 type paginationData struct {
 	PrevTitle string
 	PrevPath  string

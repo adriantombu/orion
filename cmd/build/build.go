@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"sort"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -36,10 +37,16 @@ func Run() error {
 		return err
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(len(articles))
 	for i := 0; i < len(articles); i++ {
-		if err := writeArticles(articles, i); err != nil {
+		if err := writeArticle(articles, i, &wg); err != nil {
 			return err
 		}
+	}
+
+	if err := writeIndex(articles); err != nil {
+		return err
 	}
 
 	if err := copyAssets(); err != nil {
@@ -53,6 +60,8 @@ func Run() error {
 	if err := generateRss(articles); err != nil {
 		return err
 	}
+
+	wg.Wait()
 
 	color.Cyan("Total duration %v\n", time.Since(start))
 
@@ -159,7 +168,7 @@ func getTitle(fm frontMatter, html string) (string, error) {
 }
 
 func getPage(html string, title string, pagination paginationData, filename string, fm frontMatter) string {
-	t, err := template.ParseFiles(filepath.Join(themePath, "template.html"))
+	t, err := template.ParseFiles(filepath.Join(themePath, "article.html"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -225,7 +234,8 @@ func getPagination(files []string, current int) (paginationData, error) {
 	return data, nil
 }
 
-func writeArticles(articles []string, i int) error {
+func writeArticle(articles []string, i int, wg *sync.WaitGroup) error {
+	defer wg.Done()
 	file := articles[i]
 
 	color.Magenta("Generating file %s...", file)
@@ -259,15 +269,48 @@ func writeArticles(articles []string, i int) error {
 	}
 	page := getPage(html, title, pagination, filename, fm)
 
-	if i == 0 {
-		if err := ioutil.WriteFile(filepath.Join(buildPath, filename), []byte(page), 0755); err != nil {
+	if err := ioutil.WriteFile(filepath.Join(buildPath, filename), []byte(page), 0755); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func writeIndex(articles []string) error {
+	color.Magenta("Generating file index.html...")
+
+	var files []frontMatter
+	for i := 0; i < len(articles); i++ {
+		file := articles[i]
+
+		fm, _, err := getHTML(file)
+		if err != nil {
 			return err
 		}
 
-		filename = "index.html"
+		fm.Slug = viper.GetString("base_url") + strings.Replace(file, ".md", ".html", 1)
+		files = append(files, fm)
 	}
 
-	if err := ioutil.WriteFile(filepath.Join(buildPath, filename), []byte(page), 0755); err != nil {
+	t, err := template.ParseFiles(filepath.Join(themePath, "index.html"))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var tpl bytes.Buffer
+	err = t.Execute(&tpl, templateIndexData{
+		Title:       viper.GetString("site_name"),
+		Description: viper.GetString("description"),
+		Canonical:   viper.GetString("base_url"),
+		Articles:    files,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	page := tpl.String()
+
+	if err := ioutil.WriteFile(filepath.Join(buildPath, "index.html"), []byte(page), 0755); err != nil {
 		return err
 	}
 
