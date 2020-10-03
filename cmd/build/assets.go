@@ -2,13 +2,13 @@ package build
 
 import (
 	"path/filepath"
-	"sync"
 
 	"github.com/fatih/color"
 	"github.com/otiai10/copy"
 )
 
-func copyAssets(wg *sync.WaitGroup) {
+// copyAssets moves the favicon, stylesheet and everything inside the static folder to the build folder
+func copyAssets() {
 	defer wg.Done()
 
 	if err := copy.Copy(filepath.Join(themePath, "favicon.png"), filepath.Join(buildPath, "favicon.png")); err != nil {
@@ -25,5 +25,4 @@ func copyAssets(wg *sync.WaitGroup) {
 		color.Red(err.Error())
 		return
 	}
-
 }

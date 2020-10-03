@@ -2,10 +2,9 @@ package build
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -30,7 +29,8 @@ type rssItem struct {
 	PubDate     string `xml:"pubDate"`
 }
 
-func generateRss(articles []string, wg *sync.WaitGroup) {
+// generateRss creates a valid Rss file for syndication purposes
+func generateRss(articles articles) {
 	defer wg.Done()
 
 	rssStruct := &rss{
@@ -41,27 +41,18 @@ func generateRss(articles []string, wg *sync.WaitGroup) {
 		LastBuildDate: time.Now().Format(time.RFC1123Z),
 	}
 
-	for i := 0; i < len(articles); i++ {
-		file := articles[i]
-		filename := strings.Replace(file, ".md", ".html", 1)
-
-		fm, html, err := getHTML(file)
-		if err != nil {
-			color.Red(err.Error())
-			return
-		}
-
-		publishedAt, errDate := time.Parse("2006-01-02", fm.PublishedAt)
+	for _, article := range articles {
+		publishedAt, errDate := time.Parse("2006-01-02", article.Metadata.PublishedAt)
 		if errDate != nil {
 			color.Red(errDate.Error())
 			return
 		}
 
 		rssStruct.Item = append(rssStruct.Item, rssItem{
-			Title:       fm.Title,
-			Description: html,
-			Link:        viper.GetString("base_url") + filename,
-			Image:       fm.OpenGraph.Image,
+			Title:       article.Metadata.Title,
+			Description: article.HTML,
+			Link:        fmt.Sprintf("%s%s", viper.GetString("base_url"), article.HTMLPath),
+			Image:       article.Metadata.OpenGraph.Image,
 			PubDate:     publishedAt.Format(time.RFC1123Z),
 		})
 	}

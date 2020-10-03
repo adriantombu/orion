@@ -1,26 +1,34 @@
+// Package build handles the compilation of the files
 package build
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
-	"text/template"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/gomarkdown/markdown"
+
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
 )
 
+var wg sync.WaitGroup
+var start time.Time
+var articlesPath = "./articles"
+var staticPath = "./static"
+var themePath string
+var buildPath string
+
+func init() {
+	start = time.Now()
+}
+
+// Run builds the HTML from Markdown files, copy the assets and generates a sitemap and a RSS feed
 func Run() error {
 	themePath = fmt.Sprintf("./themes/%s", viper.GetString("theme"))
 	buildPath = viper.GetString("build_path")
@@ -37,17 +45,16 @@ func Run() error {
 		return err
 	}
 
-	var wg sync.WaitGroup
 	wg.Add(len(articles))
-	for i := 0; i < len(articles); i++ {
-		go writeArticle(articles, i, &wg)
+	for _, article := range articles {
+		go article.write()
 	}
 
 	wg.Add(4)
-	go writeIndex(articles, &wg)
-	go copyAssets(&wg)
-	go generateSitemap(articles, &wg)
-	go generateRss(articles, &wg)
+	go generateIndex(articles)
+	go copyAssets()
+	go generateSitemap(articles)
+	go generateRss(articles)
 
 	wg.Wait()
 
@@ -56,6 +63,7 @@ func Run() error {
 	return nil
 }
 
+// resetBuildDirectory deletes the current build directory with everything inside and recreates an empty build folder
 func resetBuildDirectory() error {
 	if err := os.RemoveAll(buildPath); err != nil {
 		return errors.New("could not reset build path")
@@ -68,242 +76,32 @@ func resetBuildDirectory() error {
 	return nil
 }
 
-func getArticles() ([]string, error) {
-	var articles []string
+// getArticles returns a sorted list of articles found in the /articles folder
+func getArticles() (articles, error) {
+	var articles articles
 
 	files, err := ioutil.ReadDir(articlesPath)
 	if err != nil {
 		return articles, err
 	}
 
+	var fileList []string
 	for _, file := range files {
 		fileName := file.Name()
 
-		if !file.IsDir() && filepath.Ext(fileName) == ".md" && strings.HasPrefix(fileName, "_") == false {
-			articles = append(articles, fileName)
+		if !file.IsDir() && filepath.Ext(fileName) == ".md" && !strings.HasPrefix(fileName, "_") {
+			fileList = append(fileList, fileName)
 		}
 	}
 
-	sort.Sort(sort.Reverse(sort.StringSlice(articles)))
+	sort.Sort(sort.Reverse(sort.StringSlice(fileList)))
+
+	for _, file := range fileList {
+		article := article{MarkdownPath: file}
+		article, _ = article.parse() // TODO: handle error
+
+		articles = append(articles, article)
+	}
 
 	return articles, nil
-}
-
-func getHTML(filename string) (frontMatter, string, error) {
-	var fm frontMatter
-	var html string
-
-	path := filepath.Join(articlesPath, filename)
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return fm, html, err
-	}
-
-	mkData := strings.TrimSpace(string(data))
-	values := strings.SplitN(mkData, "---", 3)
-	if err = yaml.Unmarshal([]byte(values[1]), &fm); err != nil {
-		return fm, html, err
-	}
-	html = string(markdown.ToHTML([]byte(values[2]), nil, nil))
-	populateFm(&fm)
-
-	return fm, html, nil
-}
-
-func populateFm(fm *frontMatter) {
-	if fm.Robots == "" {
-		if robots := viper.GetString("robots"); robots != "" {
-			fm.Robots = robots
-		}
-	}
-
-	if fm.OpenGraph.Type == "" {
-		if ogType := viper.GetString("opengraph.type"); ogType != "" {
-			fm.OpenGraph.Type = ogType
-		}
-	}
-
-	if fm.Twitter.Card == "" {
-		if twCard := viper.GetString("twitter.card"); twCard != "" {
-			fm.Twitter.Card = twCard
-		}
-	}
-
-	if fm.Twitter.Site == "" {
-		if twSite := viper.GetString("twitter.site"); twSite != "" {
-			fm.Twitter.Site = twSite
-		}
-	}
-
-	if fm.Twitter.Creator == "" {
-		if twCreator := viper.GetString("twitter.creator"); twCreator != "" {
-			fm.Twitter.Creator = twCreator
-		}
-	}
-}
-
-func getTitle(fm frontMatter, html string) (string, error) {
-	if fm.Title != "" {
-		return fm.Title, nil
-	}
-
-	re, err := regexp.Compile(`<h1>(.*)</h1>`)
-	if err != nil {
-		return "", err
-	}
-
-	return re.FindStringSubmatch(html)[1], nil
-}
-
-func getPage(html string, title string, pagination paginationData, filename string, fm frontMatter) string {
-	t, err := template.ParseFiles(filepath.Join(themePath, "article.html"))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	canonical := viper.GetString("base_url") + filename
-	if fm.Canonical != "" {
-		canonical = fm.Canonical
-	}
-
-	var tpl bytes.Buffer
-	err = t.Execute(&tpl, templateData{
-		Title:       title,
-		SiteName:    viper.GetString("site_name"),
-		Canonical:   canonical,
-		Content:     html,
-		Pagination:  pagination,
-		FrontMatter: fm,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return tpl.String()
-}
-
-func getPagination(files []string, current int) (paginationData, error) {
-	var data paginationData
-
-	if current != 0 {
-		fm, prevHTML, err := getHTML(files[current-1])
-		if err != nil {
-			return data, err
-		}
-
-		prevTitle, errT := getTitle(fm, prevHTML)
-		if errT != nil {
-			return data, errT
-		}
-
-		data.PrevTitle = prevTitle
-		data.PrevPath = strings.Replace(files[current-1], ".md", ".html", 1)
-	}
-
-	if current != len(files)-1 && current+1 <= len(files)-1 {
-		fm, nextHTML, err := getHTML(files[current+1])
-		if err != nil {
-			return data, err
-		}
-
-		nextTitle, errT := getTitle(fm, nextHTML)
-		if errT != nil {
-			return data, errT
-		}
-
-		data.NextTitle = nextTitle
-		data.NextPath = strings.Replace(files[current+1], ".md", ".html", 1)
-	}
-
-	return data, nil
-}
-
-func writeArticle(articles []string, i int, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	file := articles[i]
-
-	color.Magenta("Generating file %s...", file)
-
-	fm, html, err := getHTML(file)
-	if err != nil {
-		color.Red(err.Error())
-		return
-	}
-
-	if len(fm.Description) > 160 {
-		color.Yellow("The description exceeds 160 characters, you should consider shortening it for SEO performances")
-	}
-
-	title, errT := getTitle(fm, html)
-	if errT != nil {
-		color.Red(errT.Error())
-		return
-	}
-
-	if len(title) > 70 {
-		color.Yellow("The title exceeds 70 characters, you should consider shortening it for SEO performances")
-	}
-
-	pagination, errP := getPagination(articles, i)
-	if errP != nil {
-		color.Red(errP.Error())
-		return
-	}
-
-	filename := strings.Replace(file, ".md", ".html", 1)
-	if fm.Slug != "" {
-		filename = fm.Slug + ".html"
-	}
-	page := getPage(html, title, pagination, filename, fm)
-
-	if err := ioutil.WriteFile(filepath.Join(buildPath, filename), []byte(page), 0755); err != nil {
-		color.Red(err.Error())
-		return
-	}
-}
-
-func writeIndex(articles []string, wg *sync.WaitGroup) {
-	defer wg.Done()
-
-	color.Magenta("Generating file index.html...")
-
-	var files []frontMatter
-	for i := 0; i < len(articles); i++ {
-		file := articles[i]
-
-		fm, _, err := getHTML(file)
-		if err != nil {
-			color.Red(err.Error())
-			return
-		}
-
-		fm.Slug = viper.GetString("base_url") + strings.Replace(file, ".md", ".html", 1)
-		files = append(files, fm)
-	}
-
-	t, err := template.ParseFiles(filepath.Join(themePath, "index.html"))
-	if err != nil {
-		color.Red(err.Error())
-		return
-	}
-
-	var tpl bytes.Buffer
-	err = t.Execute(&tpl, templateIndexData{
-		Title:       viper.GetString("site_name"),
-		Description: viper.GetString("description"),
-		Canonical:   viper.GetString("base_url"),
-		Articles:    files,
-	})
-	if err != nil {
-		color.Red(err.Error())
-		return
-	}
-
-	page := tpl.String()
-
-	if err := ioutil.WriteFile(filepath.Join(buildPath, "index.html"), []byte(page), 0755); err != nil {
-		color.Red(err.Error())
-		return
-	}
 }
