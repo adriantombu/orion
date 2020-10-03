@@ -8,33 +8,33 @@
     <meta name="og:url" content="{{.Canonical}}" />
     <meta name="og:site_name" content="{{.SiteName}}" />
 
-    {{ if .FrontMatter.Description }}
-      <meta name="description" content="{{.FrontMatter.Description}}" />
-      <meta name="og:description" content="{{.FrontMatter.Description}}" />
+    {{ if .Metadata.Description }}
+      <meta name="description" content="{{.Metadata.Description}}" />
+      <meta name="og:description" content="{{.Metadata.Description}}" />
     {{- end }}
 
-    {{ if .FrontMatter.Robots }}
-      <meta name="robots" content="{{.FrontMatter.Robots}}" />
+    {{ if .Metadata.Robots }}
+      <meta name="robots" content="{{.Metadata.Robots}}" />
     {{- end }}
 
-    {{ if .FrontMatter.OpenGraph.Type }}
-      <meta name="og:type" content="{{.FrontMatter.OpenGraph.Type}}" />
+    {{ if .Metadata.OpenGraph.Type }}
+      <meta name="og:type" content="{{.Metadata.OpenGraph.Type}}" />
     {{- end }}
 
-    {{ if .FrontMatter.OpenGraph.Image }}
-      <meta name="og:image" content="{{.FrontMatter.OpenGraph.Image}}" />
+    {{ if .Metadata.OpenGraph.Image }}
+      <meta name="og:image" content="{{.Metadata.OpenGraph.Image}}" />
     {{- end }}
 
-    {{ if .FrontMatter.Twitter.Card }}
-      <meta name="twitter:card" content="{{.FrontMatter.Twitter.Card}}" />
+    {{ if .Metadata.Twitter.Card }}
+      <meta name="twitter:card" content="{{.Metadata.Twitter.Card}}" />
     {{- end }}
 
-    {{ if .FrontMatter.Twitter.Site }}
-      <meta name="twitter:site" content="@{{.FrontMatter.Twitter.Site}}" />
+    {{ if .Metadata.Twitter.Site }}
+      <meta name="twitter:site" content="@{{.Metadata.Twitter.Site}}" />
     {{- end }}
 
-    {{ if .FrontMatter.Twitter.Creator }}
-      <meta name="twitter:creator" content="@{{.FrontMatter.Twitter.Creator}}" />
+    {{ if .Metadata.Twitter.Creator }}
+      <meta name="twitter:creator" content="@{{.Metadata.Twitter.Creator}}" />
     {{- end }}
 
     <title>{{.Title}} - {{.SiteName}}</title>
@@ -53,17 +53,5 @@
     <article>
       {{.Content}}
     </article>
-
-    <footer>
-      <nav>
-        {{ if .Pagination.PrevTitle }}
-          <p><a href="{{.Pagination.PrevPath}}">&lt;&lt; {{.Pagination.PrevTitle}}</a></p>
-        {{- end }}
-
-        {{ if .Pagination.NextTitle }}
-          <p><a href="{{.Pagination.NextPath}}">{{.Pagination.NextTitle}} &gt;&gt;</a></p>
-        {{- end }}
-      </nav>
-    </footer>
   </body>
 </html>

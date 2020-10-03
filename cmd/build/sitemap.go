@@ -4,10 +4,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"path/filepath"
-	"strings"
-	"sync"
 	"time"
 
 	"github.com/fatih/color"
@@ -29,42 +26,37 @@ type url struct {
 	Priority string `xml:"priority"`
 }
 
-func generateSitemap(articles []string, wg *sync.WaitGroup) {
+// generateSitemap creates a sitemap for SEO purposes
+func generateSitemap(articles articles) {
 	defer wg.Done()
 
-	urlSet := &urlSet{
+	urlSet := urlSet{
 		Xmlns:    "http://www.sitemaps.org/schemas/sitemap/0.9",
 		XmlnsXsi: "http://www.w3.org/2001/XMLSchema-instance",
 		Xsi:      "http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd",
 	}
 
 	priority := 1.00
+	urlSet.Urls = append(urlSet.Urls, url{
+		Loc:      fmt.Sprintf("%s%s", viper.GetString("base_url"), "index.html"),
+		LastMod:  time.Now().Format(time.RFC3339),
+		Priority: fmt.Sprintf("%.2f", priority),
+	})
 
-	for i := 0; i < len(articles); i++ {
-		file := articles[i]
-		filename := strings.Replace(file, ".md", ".html", 1)
-
-		fileStat, err := os.Stat(filepath.Join(articlesPath, file))
-		if err != nil {
-			color.Red(err.Error())
+	for _, article := range articles {
+		publishedAt, errDate := time.Parse("2006-01-02", article.Metadata.PublishedAt)
+		if errDate != nil {
+			color.Red(errDate.Error())
 			return
 		}
 
-		if i == 0 {
-			urlSet.Urls = append(urlSet.Urls, url{
-				Loc:      viper.GetString("base_url") + "index.html",
-				LastMod:  fileStat.ModTime().Format(time.RFC3339),
-				Priority: fmt.Sprintf("%.2f", priority),
-			})
-		}
-
 		urlSet.Urls = append(urlSet.Urls, url{
-			Loc:      viper.GetString("base_url") + filename,
-			LastMod:  fileStat.ModTime().Format(time.RFC3339),
+			Loc:      fmt.Sprintf("%s%s", viper.GetString("base_url"), article.HTMLPath),
+			LastMod:  publishedAt.Format(time.RFC3339),
 			Priority: fmt.Sprintf("%.2f", priority),
 		})
 
-		priority = priority * 0.8
+		priority = priority * 0.9
 	}
 
 	data, _ := xml.MarshalIndent(urlSet, "", "    ")

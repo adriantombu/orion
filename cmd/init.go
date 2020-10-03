@@ -1,23 +1,7 @@
-/*
-Copyright © 2020 Adrian Tombu <adrian@otso.fr>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+// Package cmd regroups all the accessible commands of Orion
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -37,7 +21,7 @@ func init() {
 		Long:    "Create a new blog in provided path. It will be a skeleton with the base theme and a few generic articles.",
 		Example: "orion init blog-path",
 		Args:    cobra.ExactArgs(1),
-		RunE:    newBlog,
+		RunE:    initialize,
 	}
 
 	rootCmd.AddCommand(cmd)
@@ -45,7 +29,8 @@ func init() {
 	cmd.Flags().BoolP("force", "f", false, "Initialize inside a non-empty directory")
 }
 
-func newBlog(cmd *cobra.Command, args []string) error {
+// initialize creates a blog to the provided folder
+func initialize(cmd *cobra.Command, args []string) error {
 	color.Cyan("Initializing a new Orion project")
 
 	force, _ := cmd.Flags().GetBool("force")
@@ -56,10 +41,9 @@ func newBlog(cmd *cobra.Command, args []string) error {
 	}
 
 	if _, err := os.Stat(path); !os.IsNotExist(err) && force == false {
-		return errors.New(fmt.Sprintf("directory %s already exists but you didn't use the --force flag", path))
+		return fmt.Errorf("directory %s already exists but you didn't use the --force flag", path)
 	}
 
-	// Create base folder
 	if err := os.MkdirAll(basePath, 0755); err != nil {
 		return err
 	}

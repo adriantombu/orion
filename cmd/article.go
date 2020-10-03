@@ -1,23 +1,7 @@
-/*
-Copyright © 2020 Adrian Tombu <adrian@otso.fr>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+// Package cmd regroups all the accessible commands of Orion
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -53,28 +37,29 @@ func init() {
 	cmd.Flags().BoolP("force", "f", false, "Overwrites the file if it already exists")
 }
 
+// newArticle creates a new Markdown article
 func newArticle(cmd *cobra.Command, args []string) error {
 	force, _ := cmd.Flags().GetBool("force")
 	draft, _ := cmd.Flags().GetBool("draft")
 
-	slug := time.Now().Format("2006-01-02") + "-" + args[0]
+	slug := fmt.Sprintf("%s-%s", time.Now().Format("2006-01-02"), args[0])
 	content := []byte(fmt.Sprintf(baseArticle, slug))
 
-	filename := slug + ".md"
+	filename := fmt.Sprintf("%s.md", slug)
 	if draft {
-		filename = "_" + filename
+		filename = fmt.Sprintf("_%s", filename)
 	}
-	path := filepath.Join("./articles/", filename)
 
+	path := filepath.Join("./articles/", filename)
 	if _, err := os.Stat(path); !os.IsNotExist(err) && force == false {
-		return errors.New(fmt.Sprintf("file %s already exists but you didn't use the --force flag to overwrite it", path))
+		return fmt.Errorf("file %s already exists but you didn't use the --force flag to overwrite it", path)
 	}
 
 	if err := ioutil.WriteFile(path, content, 0755); err != nil {
 		return err
 	}
 
-	color.Green("The article can be accessed on " + path)
+	color.Green("The article can be accessed on %s", path)
 
 	return nil
 }
