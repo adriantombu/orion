@@ -51,6 +51,7 @@ slug: my-super-slug
 canonical:
 robots:
 published_at:
+template:
 
 opengraph:
     type:

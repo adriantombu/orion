@@ -25,12 +25,6 @@ func Execute() {
 	}
 }
 
-func init() {
-	cobra.OnInitialize(initConfig)
-
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-}
-
 func initConfig() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")

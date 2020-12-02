@@ -26,6 +26,8 @@ func init() {
 
 // serve builds the blog and creates a temporary server to navigate the pages
 func serve(cmd *cobra.Command, args []string) error {
+	cobra.OnInitialize(initConfig)
+
 	port, _ := cmd.Flags().GetString("port")
 
 	if err := build.Run(); err != nil {

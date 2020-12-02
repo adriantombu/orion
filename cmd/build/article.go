@@ -34,6 +34,7 @@ type metaData struct {
 	Canonical   string `yaml:"canonical"`
 	Robots      string `yaml:"robots"`
 	PublishedAt string `yaml:"published_at"`
+	Template    string `yaml:"template"`
 
 	OpenGraph struct {
 		Type  string `yaml:"type"`
@@ -167,7 +168,12 @@ func (article article) getTitle() string {
 
 // getTemplate returns the template of the article
 func (article article) getTemplate() string {
-	t, err := template.ParseFiles(filepath.Join(themePath, "article.html"))
+	tplFile := "article.html"
+	if article.Metadata.Template != "" {
+		tplFile = article.Metadata.Template + ".html"
+	}
+
+	t, err := template.ParseFiles(filepath.Join(themePath, tplFile))
 	if err != nil {
 		color.Red(err.Error())
 		return ""
