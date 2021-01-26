@@ -6,6 +6,7 @@ A static site generator written in Go to create a simple blog from Markdown file
 This is not intended to create complex websites, the excellent [Hugo](https://gohugo.io/) does that extremely well already!
 
 ### CLI Actions
+* `orion version` : displays the current version of Orion
 * `orion init` : creates a new Orion directory to start a new blog (with 2 or 3 fake articles)
 * `orion article article-file-name` : creates a new markdown article (may be a draft, hence not published)
 * `orion build` : exports the markdown to html

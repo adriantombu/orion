@@ -18,7 +18,7 @@ func init() {
 
 // version prints the Orion build version
 func version(_ *cobra.Command, _ []string) error {
-	color.Cyan("Orion v0.1.4")
+	color.Cyan("Orion v0.1.6")
 
 	return nil
 }
