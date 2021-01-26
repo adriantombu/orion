@@ -20,8 +20,6 @@ func init() {
 
 // generate starts the build
 func generate(cmd *cobra.Command, args []string) error {
-	cobra.OnInitialize(initConfig)
-
 	color.Cyan("Building the Orion project for production")
 
 	if err := build.Run(); err != nil {

@@ -25,7 +25,7 @@ func Execute() {
 	}
 }
 
-func initConfig() {
+func init() {
 	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 	viper.AutomaticEnv()
