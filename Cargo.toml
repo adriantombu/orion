@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "3.1.10", features = ["derive"] }
+rust-embed = { version="6.4.0", features = ["debug-embed", "compression", "include-exclude"] }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta name="og:title" content="{{.Title}}" />
+    <meta name="og:url" content="{{.Canonical}}" />
+    <meta name="og:site_name" content="{{.SiteName}}" />
+
+    {{ if .Metadata.Description }}
+      <meta name="description" content="{{.Metadata.Description}}" />
+      <meta name="og:description" content="{{.Metadata.Description}}" />
+    {{- end }}
+
+    {{ if .Metadata.Robots }}
+      <meta name="robots" content="{{.Metadata.Robots}}" />
+    {{- end }}
+
+    {{ if .Metadata.OpenGraph.Type }}
+      <meta name="og:type" content="{{.Metadata.OpenGraph.Type}}" />
+    {{- end }}
+
+    {{ if .Metadata.OpenGraph.Image }}
+      <meta name="og:image" content="{{.Metadata.OpenGraph.Image}}" />
+    {{- end }}
+
+    {{ if .Metadata.Twitter.Card }}
+      <meta name="twitter:card" content="{{.Metadata.Twitter.Card}}" />
+    {{- end }}
+
+    {{ if .Metadata.Twitter.Site }}
+      <meta name="twitter:site" content="@{{.Metadata.Twitter.Site}}" />
+    {{- end }}
+
+    {{ if .Metadata.Twitter.Creator }}
+      <meta name="twitter:creator" content="@{{.Metadata.Twitter.Creator}}" />
+    {{- end }}
+
+    <title>{{.Title}} - {{.SiteName}}</title>
+
+    <link rel="icon" href="./favicon.png" />
+    <link href="./style.css" rel="stylesheet" type="text/css" />
+    <link href="./rss.xml" type="application/rss+xml" />
+    <link rel="canonical" href="{{.Canonical}}" />
+  </head>
+
+  <body>
+    <header>
+      <nav><a href="/">Orion</a></nav>
+    </header>
+
+    <article>
+      {{.Content}}
+    </article>
+  </body>
+</html>

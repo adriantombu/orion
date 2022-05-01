@@ -1,3 +1,8 @@
+mod article;
+mod build;
+mod init;
+mod serve;
+
 use clap::{Parser, Subcommand};
 
 /// A simple static blog generator
@@ -40,17 +45,9 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Article { name } => {
-            println!("Creating a new article {}", name);
-        }
-        Commands::Build => {
-            println!("Building the blog");
-        }
-        Commands::Init { path } => {
-            println!("Initialize a new Orion project in {}", path);
-        }
-        Commands::Serve => {
-            println!("Serving html blog");
-        }
+        Commands::Article { name } => article::run(&name),
+        Commands::Build => build::run(),
+        Commands::Init { path } => init::run(&path),
+        Commands::Serve => serve::run(),
     }
 }
