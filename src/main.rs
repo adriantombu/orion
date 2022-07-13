@@ -1,3 +1,5 @@
+extern crate core;
+
 mod article;
 mod build;
 mod init;
@@ -46,7 +48,7 @@ fn main() {
 
     match args.command {
         Commands::Article { name } => article::run(&name),
-        Commands::Build => build::run(),
+        Commands::Build => build::run().expect("Error while building"),
         Commands::Init { path } => init::run(&path),
         Commands::Serve => serve::run(),
     }
