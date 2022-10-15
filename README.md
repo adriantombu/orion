@@ -3,14 +3,12 @@ Orion
 
 A static site generator written in Rust to create a simple blog from Markdown files.
 
-This is not intended to create complex websites, the excellent [Hugo](https://gohugo.io/) does that extremely well already!
-
 ### CLI Actions
-* `orion version` : displays the current version of Orion
-* `orion init path` : creates a new Orion directory to start a new blog (with 2 or 3 fake articles)
-* `orion article article-file-name` : creates a new markdown article (may be a draft, hence not published)
-* `orion build` : exports the markdown to html
-* `orion serve` : builds and starts a small server to show your blog
+* `orion init [PATH]` : create a new Orion directory to start a new blog (with a few fake articles)
+* `orion article [FILENAME]` : create a new Markdown article
+* `orion build` : export the Markdown to html
+* `orion serve [-b|--build]` : optionnaly build and start a local server to show your blog
+* `orion --version` : display the current version of Orion
 
 You can use the `--help` or `-h` flag for each action to know more
 
@@ -66,13 +64,6 @@ twitter:
 ---
 
 The actual markdown content
-```
-
-### How to build and package the assets
-
-```
-chmod +X ./scripts/build.sh
-./scripts/build.sh
 ```
 
 ### Credits 

@@ -9,6 +9,7 @@ use std::path::Path;
 #[exclude = ".DS_Store"]
 struct Asset;
 
+/// Initialise a new Orion project
 pub fn run(path: &str) {
     println!("Initialize a new Orion project in {}", path);
 
@@ -17,6 +18,7 @@ pub fn run(path: &str) {
         return;
     }
 
+    // TODO: unwrap
     fs::create_dir_all(path).unwrap();
     fs::create_dir_all(format!("{}/articles", path)).unwrap();
     fs::create_dir_all(format!("{}/themes/orion", path)).unwrap();
