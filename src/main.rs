@@ -52,7 +52,7 @@ enum Commands {
 
 fn main() {
     let args = Cli::parse();
-    let config = Config::new();
+    let config = Config::new().expect("Unable to retrieve configuration");
 
     match args.command {
         Commands::Article { name } => article::run(&name),

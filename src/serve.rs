@@ -9,8 +9,10 @@ pub fn run(build: bool, config: &Config) {
     }
 
     println!("Listening to localhost:1337...");
+    let path = config.build_path.clone();
+
     rouille::start_server("localhost:1337", move |request| {
-        let response = rouille::match_assets(request, "public");
+        let response = rouille::match_assets(request, &path);
         if response.is_success() {
             return response;
         }

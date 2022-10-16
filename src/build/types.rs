@@ -15,9 +15,12 @@ pub enum BuildError {
     #[error("{0}")]
     TemplateError(#[from] tinytemplate::error::Error),
 
+    #[error("{0}")]
+    FsExtraError(#[from] fs_extra::error::Error),
+
     #[error("Filename is empty")]
     EmptyFilenameError,
 
-    #[error("Error while parsing file {0}")]
+    #[error("Unable to parse file: {0}")]
     ParserError(#[from] ParserError),
 }

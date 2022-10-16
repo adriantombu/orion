@@ -1,14 +1,11 @@
 #[cfg(test)]
 mod build_tests {
     use crate::build::get_html_file_path;
-    use std::path::PathBuf;
+    use std::path::Path;
 
     #[test]
     fn test_get_html_file_path_empty() {
-        let mut path = PathBuf::new();
-        path.push("");
-
-        assert!(get_html_file_path(&path).is_err());
+        assert!(get_html_file_path(Path::new(""), Path::new("")).is_err());
     }
 
     #[test]
@@ -16,20 +13,20 @@ mod build_tests {
         let tests = vec![
             (
                 "articles/2019-12-31-markdown-demo.md",
-                "./public/2019-12-31-markdown-demo.html",
+                "./doc/2019-12-31-markdown-demo.html",
             ),
             (
                 "articles/2019-12-31-markdown-demo.txt",
-                "./public/2019-12-31-markdown-demo.txt",
+                "./doc/2019-12-31-markdown-demo.txt",
             ),
         ];
 
         tests.into_iter().for_each(|(value, expect)| {
-            let mut path = PathBuf::new();
-            path.push(value);
+            let config_path = Path::new("./doc");
+            let path = Path::new(value);
 
             assert_eq!(
-                get_html_file_path(&path).expect("could not retrieve filename"),
+                get_html_file_path(config_path, path).expect("could not retrieve filename"),
                 expect
             );
         });
