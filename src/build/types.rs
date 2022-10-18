@@ -1,4 +1,4 @@
-use crate::parser::ParserError;
+use crate::build::parser::ParserError;
 use thiserror::Error;
 
 #[derive(Error, Debug)]

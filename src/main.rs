@@ -4,7 +4,6 @@ mod article;
 mod build;
 mod config;
 mod init;
-mod parser;
 mod serve;
 
 use crate::config::Config;

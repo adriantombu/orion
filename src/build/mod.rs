@@ -1,9 +1,10 @@
+mod parser;
 mod tests;
 mod types;
 
+use crate::build::parser::markdown::MarkdownParser;
+use crate::build::parser::{ParsedData, Parser};
 use crate::build::types::BuildError;
-use crate::parser::markdown::MarkdownParser;
-use crate::parser::{ParsedData, Parser};
 use crate::Config;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;

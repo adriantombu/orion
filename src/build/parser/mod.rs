@@ -13,7 +13,6 @@ pub trait Parser {
 pub struct ParsedData {
     pub title: String,
     pub description: String,
-    pub sitename: String,
     pub published_at: String,
     pub content: String,
 }
