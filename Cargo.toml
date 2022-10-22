@@ -16,3 +16,4 @@ rouille = "3.5.0"
 toml = "0.5.9"
 fs_extra = "1.2.0"
 chrono = { version = "0.4", features = ["serde"] }
+sitewriter = "0.5.3"

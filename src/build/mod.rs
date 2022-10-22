@@ -6,9 +6,9 @@ mod types;
 
 use crate::build::parser::markdown::MarkdownParser;
 use crate::build::parser::Parser;
+use crate::build::sitemap::sitemap;
 use crate::build::types::{BuildError, Post};
 use crate::Config;
-use chrono::Datelike;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;
 use std::fs;
@@ -32,7 +32,9 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
             .and_then(|_| copy_static_assets(config))?;
 
         // Order by descending publication date
-        posts.sort_by_key(|p| -p.published_at_raw.num_days_from_ce());
+        posts.sort_by_key(|p| -p.published_at_raw.timestamp());
+
+        sitemap(config, &posts)?;
 
         Ok(())
     })

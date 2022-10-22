@@ -1,6 +1,6 @@
 pub mod markdown;
 
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use thiserror::Error;
 
 pub trait Parser {
@@ -14,7 +14,7 @@ pub trait Parser {
 pub struct ParsedData {
     pub title: String,
     pub description: String,
-    pub published_at: NaiveDate,
+    pub published_at: DateTime<Utc>,
     pub content: String,
 }
 

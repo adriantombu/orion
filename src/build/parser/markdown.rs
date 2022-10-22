@@ -1,5 +1,5 @@
 use crate::build::parser::{ParsedData, Parser, ParserError};
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDateTime, Utc};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use pulldown_cmark::{html, Options, Parser as CmarPulldown};
@@ -31,10 +31,13 @@ impl Parser for MarkdownParser {
                 Ok(ParsedData {
                     title: fm["title"].as_string()?,
                     description: fm["description"].as_string()?,
-                    published_at: NaiveDate::parse_from_str(
-                        &fm["published_at"].as_string()?,
-                        "%Y-%m-%d",
-                    )?,
+                    published_at: DateTime::from_utc(
+                        NaiveDateTime::parse_from_str(
+                            &fm["published_at"].as_string()?,
+                            "%Y-%m-%d %H:%M:%S",
+                        )?,
+                        Utc,
+                    ),
                     content,
                 })
             })

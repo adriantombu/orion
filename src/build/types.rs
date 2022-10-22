@@ -1,7 +1,9 @@
 use crate::build::parser::ParserError;
-use chrono::NaiveDate;
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 use thiserror::Error;
+
+use super::sitemap::SitemapError;
 
 #[derive(Error, Debug)]
 pub enum BuildError {
@@ -25,6 +27,9 @@ pub enum BuildError {
 
     #[error("Unable to parse file: {0}")]
     ParserError(#[from] ParserError),
+
+    #[error("Unable to generate sitemap: {0}")]
+    SitemapError(#[from] SitemapError),
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -32,7 +37,7 @@ pub struct Post {
     pub title: String,
     pub description: String,
     pub published_at: String,
-    pub published_at_raw: NaiveDate,
+    pub published_at_raw: DateTime<Utc>,
     pub content: String,
     pub canonical: String,
     pub sitename: String,
