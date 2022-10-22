@@ -1,6 +1,6 @@
 pub mod markdown;
 
-use serde::Serialize;
+use chrono::NaiveDate;
 use thiserror::Error;
 
 pub trait Parser {
@@ -9,11 +9,12 @@ pub trait Parser {
 }
 
 // TODO: handle more values
-#[derive(Debug, Serialize, Default)]
+// TODO: only use Post struct?
+#[derive(Debug)]
 pub struct ParsedData {
     pub title: String,
     pub description: String,
-    pub published_at: String,
+    pub published_at: NaiveDate,
     pub content: String,
 }
 
@@ -24,4 +25,7 @@ pub enum ParserError {
 
     #[error("Could not parse markdown field: {0}")]
     MarkdownError(#[from] gray_matter::Error),
+
+    #[error("Could not parse date field: {0}")]
+    DateParseError(#[from] chrono::ParseError),
 }

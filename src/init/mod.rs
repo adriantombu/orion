@@ -20,7 +20,7 @@ pub fn run(path: &str) {
 
     // TODO: unwrap
     fs::create_dir_all(path).unwrap();
-    fs::create_dir_all(format!("{}/articles", path)).unwrap();
+    fs::create_dir_all(format!("{}/posts", path)).unwrap();
     fs::create_dir_all(format!("{}/themes/orion", path)).unwrap();
 
     for file in Asset::iter() {

@@ -1,9 +1,9 @@
 extern crate core;
 
-mod article;
 mod build;
 mod config;
 mod init;
+mod post;
 mod serve;
 
 use crate::config::Config;
@@ -15,7 +15,7 @@ use clap::{Parser, Subcommand};
     author = "Adrian Tombu <adrian@otso.fr>",
     version,
     about = "A simple static blog generator",
-    long_about = "Write your article in Markdown and build them into a static HTML website"
+    long_about = "Write your post in Markdown and build them into a static HTML website"
 )]
 struct Cli {
     #[clap(subcommand)]
@@ -24,10 +24,10 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// Create a new empty article
+    /// Create a new empty post
     #[clap(arg_required_else_help = true)]
-    Article {
-        /// The filename of the article
+    Post {
+        /// The filename of the post
         name: String,
     },
 
@@ -49,12 +49,13 @@ enum Commands {
     },
 }
 
+// TODO: use anyhow instead of thiserror
 fn main() {
     let args = Cli::parse();
     let config = Config::new().expect("Unable to retrieve configuration");
 
     match args.command {
-        Commands::Article { name } => article::run(&name),
+        Commands::Post { name } => post::run(&name),
         Commands::Build => build::run(&config).expect("Error while building"),
         Commands::Init { path } => init::run(&path),
         Commands::Serve { build } => serve::run(build, &config),

@@ -1,4 +1,5 @@
 use crate::build::parser::{ParsedData, Parser, ParserError};
+use chrono::NaiveDate;
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
 use pulldown_cmark::{html, Options, Parser as CmarPulldown};
@@ -27,12 +28,13 @@ impl Parser for MarkdownParser {
             .as_ref()
             .ok_or(ParserError::EmptyValueError)
             .and_then(|fm| {
-                println!("{:?}", fm);
-
                 Ok(ParsedData {
                     title: fm["title"].as_string()?,
                     description: fm["description"].as_string()?,
-                    published_at: fm["published_at"].as_string()?,
+                    published_at: NaiveDate::parse_from_str(
+                        &fm["published_at"].as_string()?,
+                        "%Y-%m-%d",
+                    )?,
                     content,
                 })
             })

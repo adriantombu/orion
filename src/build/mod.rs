@@ -1,11 +1,14 @@
 mod parser;
+mod rss;
+mod sitemap;
 mod tests;
 mod types;
 
 use crate::build::parser::markdown::MarkdownParser;
-use crate::build::parser::{ParsedData, Parser};
-use crate::build::types::BuildError;
+use crate::build::parser::Parser;
+use crate::build::types::{BuildError, Post};
 use crate::Config;
+use chrono::Datelike;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;
 use std::fs;
@@ -17,14 +20,21 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
     println!("Building the blog");
 
     prepare_build_directory(&config.build_path).and_then(|_| {
-        glob("./articles/*.md")?
-            .try_for_each(|entry| entry.map(|path| generate_file(config, &path))?)
-            .and_then(|_| copy_static_assets(config))
+        let mut posts: Vec<Post> = vec![];
 
+        // TODO: rss
+        // TODO: sitemap
         // TODO: generate pagination
         // TODO: generate index page
-        // TODO: generate sitemap
-        // TODO: generate rss
+
+        glob("./posts/*.md")?
+            .try_for_each(|entry| entry.map(|path| generate_file(config, &mut posts, &path))?)
+            .and_then(|_| copy_static_assets(config))?;
+
+        // Order by descending publication date
+        posts.sort_by_key(|p| -p.published_at_raw.num_days_from_ce());
+
+        Ok(())
     })
 }
 
@@ -36,37 +46,59 @@ fn prepare_build_directory(build_path: &Path) -> Result<(), BuildError> {
     Ok(fs::create_dir_all(build_path)?)
 }
 
-fn generate_file(config: &Config, path: &PathBuf) -> Result<(), BuildError> {
+fn generate_file(config: &Config, posts: &mut Vec<Post>, path: &PathBuf) -> Result<(), BuildError> {
     fs::read_to_string(path)
         .map_err(BuildError::StdIoError)
         .and_then(|contents| Ok(MarkdownParser::new().parse(&contents)?))
-        .and_then(|data| generate_template(&config.theme, &data))
-        .and_then(|html| save(get_html_file_path(&config.build_path, path)?, html))
+        .and_then(|data| {
+            let post = Post {
+                title: data.title,
+                description: data.description,
+                published_at: data.published_at.to_string(),
+                published_at_raw: data.published_at,
+                content: data.content,
+                canonical: get_canonical_url(&config.base_url, path)?,
+                sitename: config.site_name.clone(),
+                path: get_html_file_path(&config.build_path, path)?,
+            };
+            posts.push(post.clone());
+            Ok(post)
+        })
+        .and_then(|post| generate_template(&config.theme, post))
+        .and_then(|(html, post)| save(post.path, html))
 }
 
-fn generate_template(theme: &str, data: &ParsedData) -> Result<String, BuildError> {
+fn generate_template(theme: &str, post: Post) -> Result<(String, Post), BuildError> {
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
-    let template = fs::read_to_string(format!("./themes/{theme}/article.html"))?;
-    tt.add_template("article", &*template)?;
+    let template = fs::read_to_string(format!("./themes/{theme}/post.html"))?;
+    tt.add_template("post", &*template)?;
 
-    Ok(tt.render("article", &data)?)
+    Ok((tt.render("post", &post)?, post))
+}
+
+fn get_canonical_url(base_url: &str, path: &Path) -> Result<String, BuildError> {
+    get_file_name(path)
+        .map(|filename| format!("{base_url}{}", str::replace(&filename, "md", "html")))
 }
 
 fn get_html_file_path(build_path: &Path, path: &Path) -> Result<String, BuildError> {
-    println!("{:?}", path);
+    get_file_name(path).map(|filename| {
+        format!(
+            "{}/{}",
+            build_path.display(),
+            str::replace(&filename, "md", "html")
+        )
+    })
+}
 
-    path.file_name()
+fn get_file_name(path: &Path) -> Result<String, BuildError> {
+    Ok(path
+        .file_name()
         .ok_or(BuildError::EmptyFilenameError)?
         .to_str()
-        .ok_or(BuildError::EmptyFilenameError)
-        .map(|filename| {
-            format!(
-                "{}/{}",
-                build_path.display(),
-                str::replace(filename, "md", "html")
-            )
-        })
+        .ok_or(BuildError::EmptyFilenameError)?
+        .to_string())
 }
 
 fn save(file_path: String, html: String) -> Result<(), BuildError> {

@@ -12,11 +12,11 @@ mod build_tests {
     fn test_get_html_file_path() {
         let tests = vec![
             (
-                "articles/2019-12-31-markdown-demo.md",
+                "posts/2019-12-31-markdown-demo.md",
                 "./doc/2019-12-31-markdown-demo.html",
             ),
             (
-                "articles/2019-12-31-markdown-demo.txt",
+                "posts/2019-12-31-markdown-demo.txt",
                 "./doc/2019-12-31-markdown-demo.txt",
             ),
         ];
