@@ -16,6 +16,7 @@ pub struct ParsedData {
     pub description: String,
     pub published_at: DateTime<Utc>,
     pub content: String,
+    pub image: String,
 }
 
 #[derive(Error, Debug)]

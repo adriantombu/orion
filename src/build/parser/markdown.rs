@@ -38,6 +38,7 @@ impl Parser for MarkdownParser {
                         )?,
                         Utc,
                     ),
+                    image: fm["image"].as_string()?,
                     content,
                 })
             })
@@ -69,7 +70,8 @@ mod build_tests {
         let contents = "---
 title: Welcome to your blog!
 description: A blog generated with Orion
-published_at: 2020-01-01
+published_at: 2020-01-01 12:34:56
+image: https://upload.wikimedia.org/wikipedia/commons/8/81/Comet_67P_on_19_September_2014_NavCam_mosaic.jpg
 ---
 
 # Welcome to your blog

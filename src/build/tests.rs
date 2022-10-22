@@ -5,7 +5,7 @@ mod build_tests {
 
     #[test]
     fn test_get_html_file_path_empty() {
-        assert!(get_html_file_path(Path::new(""), Path::new("")).is_err());
+        assert!(get_html_file_path(Path::new("")).is_err());
     }
 
     #[test]
@@ -13,11 +13,11 @@ mod build_tests {
         let tests = vec![
             (
                 "posts/2019-12-31-markdown-demo.md",
-                "./doc/2019-12-31-markdown-demo.html",
+                "2019-12-31-markdown-demo.html",
             ),
             (
                 "posts/2019-12-31-markdown-demo.txt",
-                "./doc/2019-12-31-markdown-demo.txt",
+                "2019-12-31-markdown-demo.txt",
             ),
         ];
 
@@ -26,7 +26,7 @@ mod build_tests {
             let path = Path::new(value);
 
             assert_eq!(
-                get_html_file_path(config_path, path).expect("could not retrieve filename"),
+                get_html_file_path(path).expect("could not retrieve filename"),
                 expect
             );
         });

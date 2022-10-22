@@ -3,34 +3,26 @@ use std::fs;
 use std::path::PathBuf;
 use thiserror::Error;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub base_url: String,
     pub site_name: String,
     pub description: String,
     pub theme: String,
     pub build_path: PathBuf,
+    pub locale: String,
     pub seo: Seo,
-    pub opengraph: OpenGraph,
     pub twitter: Twitter,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Seo {
     pub robots: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct OpenGraph {
-    #[serde(rename = "type")]
-    pub og_type: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Twitter {
-    pub card: String,
     pub creator: String,
-    pub site: String,
 }
 
 impl Config {

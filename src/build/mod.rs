@@ -8,7 +8,7 @@ use crate::build::parser::markdown::MarkdownParser;
 use crate::build::parser::Parser;
 use crate::build::rss::rss;
 use crate::build::sitemap::sitemap;
-use crate::build::types::{BuildError, Post};
+use crate::build::types::{BuildError, IndexPage, Post};
 use crate::Config;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;
@@ -23,9 +23,6 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
     prepare_build_directory(&config.build_path).and_then(|_| {
         let mut posts: Vec<Post> = vec![];
 
-        // TODO: generate pagination
-        // TODO: generate index page
-
         glob("./posts/*.md")?
             .try_for_each(|entry| entry.map(|path| generate_file(config, &mut posts, &path))?)
             .and_then(|_| copy_static_assets(config))?;
@@ -33,6 +30,7 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
         // Order by descending publication date
         posts.sort_by_key(|p| -p.published_at_raw.timestamp());
 
+        generate_index(config, &posts)?;
         sitemap(config, &posts)?;
         rss(config, &posts)?;
 
@@ -56,18 +54,22 @@ fn generate_file(config: &Config, posts: &mut Vec<Post>, path: &PathBuf) -> Resu
             let post = Post {
                 title: data.title,
                 description: data.description,
-                published_at: data.published_at.to_string(),
+                published_at: data.published_at.format("%Y-%m-%d").to_string(),
                 published_at_raw: data.published_at,
                 content: data.content,
+                image: data.image,
                 canonical: get_canonical_url(&config.base_url, path)?,
+                locale: config.locale.to_string(),
                 sitename: config.site_name.clone(),
-                path: get_html_file_path(&config.build_path, path)?,
+                path: get_html_file_path(path)?,
+                seo: config.seo.clone(),
+                twitter: config.twitter.clone(),
             };
             posts.push(post.clone());
             Ok(post)
         })
         .and_then(|post| generate_template(&config.theme, post))
-        .and_then(|(html, post)| save(post.path, html))
+        .and_then(|(html, post)| save(&config.build_path, post.path, html))
 }
 
 fn generate_template(theme: &str, post: Post) -> Result<(String, Post), BuildError> {
@@ -84,14 +86,8 @@ fn get_canonical_url(base_url: &str, path: &Path) -> Result<String, BuildError> 
         .map(|filename| format!("{base_url}{}", str::replace(&filename, "md", "html")))
 }
 
-fn get_html_file_path(build_path: &Path, path: &Path) -> Result<String, BuildError> {
-    get_file_name(path).map(|filename| {
-        format!(
-            "{}/{}",
-            build_path.display(),
-            str::replace(&filename, "md", "html")
-        )
-    })
+fn get_html_file_path(path: &Path) -> Result<String, BuildError> {
+    get_file_name(path).map(|filename| format!("{}", str::replace(&filename, "md", "html")))
 }
 
 fn get_file_name(path: &Path) -> Result<String, BuildError> {
@@ -103,10 +99,13 @@ fn get_file_name(path: &Path) -> Result<String, BuildError> {
         .to_string())
 }
 
-fn save(file_path: String, html: String) -> Result<(), BuildError> {
+fn save(build_path: &PathBuf, file_path: String, html: String) -> Result<(), BuildError> {
     println!("Saving to {}...", file_path);
 
-    Ok(fs::write(file_path, html.as_bytes())?)
+    Ok(fs::write(
+        format!("{}/{}", build_path.display(), file_path),
+        html.as_bytes(),
+    )?)
 }
 
 fn copy_static_assets(config: &Config) -> Result<(), BuildError> {
@@ -125,4 +124,30 @@ fn copy_static_assets(config: &Config) -> Result<(), BuildError> {
     copy("./static/images", &config.build_path, &CopyOptions::new())?;
 
     Ok(())
+}
+
+fn generate_index(config: &Config, posts: &[Post]) -> Result<(), BuildError> {
+    println!("Generating index page...");
+
+    let mut tt = TinyTemplate::new();
+    tt.set_default_formatter(&format_unescaped);
+    let template = fs::read_to_string(format!("./themes/{}/index.html", config.theme))?;
+    tt.add_template("index", &*template)?;
+
+    let index = IndexPage {
+        title: config.site_name.to_string(),
+        description: config.description.to_string(),
+        canonical: config.base_url.to_string(),
+        locale: config.locale.to_string(),
+        posts: posts.to_vec(),
+        seo: config.seo.clone(),
+        twitter: config.twitter.clone(),
+    };
+
+    let data = tt.render("index", &index)?;
+
+    Ok(fs::write(
+        &format!("{}/index.html", config.build_path.display()),
+        data.as_bytes(),
+    )?)
 }

@@ -2,6 +2,7 @@
 title: Welcome to your blog!
 description: A blog generated with Orion
 published_at: 2020-01-01
+image: ""
 ---
 
 # Welcome to your blog

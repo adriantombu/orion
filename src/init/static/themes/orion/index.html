@@ -1,21 +1,27 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="{{.Description}}" />
-    <meta name="og:title" content="{{.Title}}" />
-    <meta name="og:url" content="{{.Canonical}}" />
-    <meta name="og:site_name" content="{{.Title}}" />
-    <meta name="og:description" content="{{.Description}}" />
-    <meta name="og:type" content="website" />
+    <meta name="description" content="{description}" />
+    <meta name="robots" content="{seo.robots}" />
 
-    <title>{{.Title}}</title>
+    <meta property="og:site_name" content="{title}" />
+    <meta property="og:locale" content="{locale}" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="{title}" />
+    <meta property="og:url" content="{canonical}" /> 
+    <meta property="og:description" content="{description}" />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:creator" content="{twitter.creator}" />
+
+    <title>{title}</title>
 
     <link rel="icon" href="./favicon.png" />
+    <link rel="canonical" href="{canonical}" />
     <link href="./style.css" rel="stylesheet" type="text/css" />
     <link href="./rss.xml" type="application/rss+xml" />
-    <link rel="canonical" href="{{.Canonical}}" />
   </head>
 
   <body>
@@ -25,11 +31,11 @@
 
     <article>
       <ul>
-        {{range .Posts}}
+        {{for post in posts}}
           <li>
-            <a href="{{.HTMLPath}}">{{.Metadata.PublishedAt}} - {{.Metadata.Title}}</a>
+            <small>.{post.published_at}</small> <a href="{post.path}">{post.title}</a>
           </li>
-        {{end}}
+        {{endfor}}
       </ul>
     </article>
   </body>

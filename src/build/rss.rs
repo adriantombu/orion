@@ -6,6 +6,8 @@ use thiserror::Error;
 
 // Generate a RSS feed from the list of posts
 pub fn rss(config: &Config, posts: &[Post]) -> Result<(), RssError> {
+    println!("Generating RSS...");
+
     // TODO: limit to 5 last articles
     let items = posts
         .iter()
@@ -26,8 +28,6 @@ pub fn rss(config: &Config, posts: &[Post]) -> Result<(), RssError> {
         .description(&config.description)
         .items(items)
         .build();
-
-    println!("{:?}", rss);
 
     Ok(fs::write(
         format!("{}/rss.xml", config.build_path.display()),
