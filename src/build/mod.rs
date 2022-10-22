@@ -6,6 +6,7 @@ mod types;
 
 use crate::build::parser::markdown::MarkdownParser;
 use crate::build::parser::Parser;
+use crate::build::rss::rss;
 use crate::build::sitemap::sitemap;
 use crate::build::types::{BuildError, Post};
 use crate::Config;
@@ -22,8 +23,6 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
     prepare_build_directory(&config.build_path).and_then(|_| {
         let mut posts: Vec<Post> = vec![];
 
-        // TODO: rss
-        // TODO: sitemap
         // TODO: generate pagination
         // TODO: generate index page
 
@@ -35,6 +34,7 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
         posts.sort_by_key(|p| -p.published_at_raw.timestamp());
 
         sitemap(config, &posts)?;
+        rss(config, &posts)?;
 
         Ok(())
     })

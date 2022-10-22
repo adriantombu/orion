@@ -3,7 +3,7 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 use thiserror::Error;
 
-use super::sitemap::SitemapError;
+use super::{rss::RssError, sitemap::SitemapError};
 
 #[derive(Error, Debug)]
 pub enum BuildError {
@@ -30,6 +30,9 @@ pub enum BuildError {
 
     #[error("Unable to generate sitemap: {0}")]
     SitemapError(#[from] SitemapError),
+
+    #[error("Unable to generate rss feed: {0}")]
+    RssError(#[from] RssError),
 }
 
 #[derive(Debug, Serialize, Clone)]
