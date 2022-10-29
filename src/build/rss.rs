@@ -8,9 +8,9 @@ use thiserror::Error;
 pub fn rss(config: &Config, posts: &[Post]) -> Result<(), RssError> {
     println!("Generating RSS...");
 
-    // TODO: limit to 5 last articles
     let items = posts
         .iter()
+        .take(5)
         .map(|p| {
             ItemBuilder::default()
                 .title(p.title.to_string())
