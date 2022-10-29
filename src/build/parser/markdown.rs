@@ -20,7 +20,7 @@ impl Parser for MarkdownParser {
         let parsed_contents = &self
             .matter
             .parse_with_struct::<PData>(text)
-            .ok_or(ParserError::MissingRequiredFieldError)?;
+            .ok_or(ParserError::MissingRequiredField)?;
         // .and_then(|res| println!("result_with_struct: {:?}", res.data));
 
         // let parsed_contents = &self.matter.parse(text);
@@ -79,7 +79,7 @@ mod build_tests {
         let res = parser.parse(contents);
 
         assert!(res.is_err());
-        assert_eq!(res.err(), Some(ParserError::MissingRequiredFieldError));
+        assert_eq!(res.err(), Some(ParserError::MissingRequiredField));
     }
 
     #[test]

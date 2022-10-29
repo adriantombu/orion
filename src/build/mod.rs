@@ -48,7 +48,7 @@ fn prepare_build_directory(build_path: &Path) -> Result<(), BuildError> {
 
 fn generate_file(config: &Config, posts: &mut Vec<Post>, path: &PathBuf) -> Result<(), BuildError> {
     fs::read_to_string(path)
-        .map_err(BuildError::StdIoError)
+        .map_err(BuildError::StdIo)
         .and_then(|contents| Ok(MarkdownParser::new().parse(&contents)?))
         .and_then(|data| {
             let post = Post {
@@ -87,19 +87,19 @@ fn get_canonical_url(base_url: &str, path: &Path) -> Result<String, BuildError> 
 }
 
 fn get_html_file_path(path: &Path) -> Result<String, BuildError> {
-    get_file_name(path).map(|filename| format!("{}", str::replace(&filename, "md", "html")))
+    get_file_name(path).map(|filename| str::replace(&filename, "md", "html"))
 }
 
 fn get_file_name(path: &Path) -> Result<String, BuildError> {
     Ok(path
         .file_name()
-        .ok_or(BuildError::EmptyFilenameError)?
+        .ok_or(BuildError::EmptyFilename)?
         .to_str()
-        .ok_or(BuildError::EmptyFilenameError)?
+        .ok_or(BuildError::EmptyFilename)?
         .to_string())
 }
 
-fn save(build_path: &PathBuf, file_path: String, html: String) -> Result<(), BuildError> {
+fn save(build_path: &Path, file_path: String, html: String) -> Result<(), BuildError> {
     println!("Saving to {}...", file_path);
 
     Ok(fs::write(

@@ -9,31 +9,31 @@ use super::{rss::RssError, sitemap::SitemapError};
 #[derive(Error, Debug)]
 pub enum BuildError {
     #[error("{0}")]
-    PatternError(#[from] glob::PatternError),
+    Pattern(#[from] glob::PatternError),
 
     #[error("{0}")]
-    GlobError(#[from] glob::GlobError),
+    Glob(#[from] glob::GlobError),
 
     #[error("{0}")]
-    StdIoError(#[from] std::io::Error),
+    StdIo(#[from] std::io::Error),
 
     #[error("{0}")]
-    TemplateError(#[from] tinytemplate::error::Error),
+    Template(#[from] tinytemplate::error::Error),
 
     #[error("{0}")]
-    FsExtraError(#[from] fs_extra::error::Error),
+    FsExtra(#[from] fs_extra::error::Error),
 
     #[error("Filename is empty")]
-    EmptyFilenameError,
+    EmptyFilename,
 
     #[error("Unable to parse file: {0}")]
-    ParserError(#[from] ParserError),
+    Parser(#[from] ParserError),
 
     #[error("Unable to generate sitemap: {0}")]
-    SitemapError(#[from] SitemapError),
+    Sitemap(#[from] SitemapError),
 
     #[error("Unable to generate rss feed: {0}")]
-    RssError(#[from] RssError),
+    Rss(#[from] RssError),
 }
 
 #[derive(Debug, Serialize, Clone)]

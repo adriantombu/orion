@@ -21,15 +21,12 @@ pub struct ParsedData {
 
 #[derive(Error, Debug, Eq, PartialEq)]
 pub enum ParserError {
-    #[error("Empty value for parsed file")]
-    EmptyValueError,
-
     #[error("A required field is missing")]
-    MissingRequiredFieldError,
+    MissingRequiredField,
 
     #[error("Could not parse markdown field: {0}")]
-    MarkdownError(#[from] gray_matter::Error),
+    Markdown(#[from] gray_matter::Error),
 
     #[error("Could not parse date field: {0}")]
-    DateParseError(#[from] chrono::ParseError),
+    DateParse(#[from] chrono::ParseError),
 }
