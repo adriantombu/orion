@@ -13,6 +13,7 @@ use crate::Config;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;
 use std::fs;
+use std::fs::File;
 use std::path::{Path, PathBuf};
 use tinytemplate::{format_unescaped, TinyTemplate};
 
@@ -32,7 +33,11 @@ pub fn run(config: &Config) -> Result<(), BuildError> {
 
         generate_index(config, &posts)?;
         sitemap(config, &posts)?;
-        rss(config, &posts)?;
+        rss(
+            config,
+            &posts,
+            &mut File::create(format!("{}/rss.xml", config.build_path.display()))?,
+        )?;
 
         Ok(())
     })
