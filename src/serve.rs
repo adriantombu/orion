@@ -17,11 +17,6 @@ pub fn run(build: bool, config: &Config) {
             return response;
         }
 
-        // TODO: proper 404 page
-        Response::html(
-            "404 error. Try <a href=\"/README.md\"`>README.md</a> or \
-                        <a href=\"/src/lib.rs\">src/lib.rs</a> for example.",
-        )
-        .with_status_code(404)
+        Response::redirect_302("/index.html")
     });
 }
