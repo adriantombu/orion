@@ -22,7 +22,6 @@ mod build_tests {
         ];
 
         tests.into_iter().for_each(|(value, expect)| {
-            let config_path = Path::new("./doc");
             let path = Path::new(value);
 
             assert_eq!(

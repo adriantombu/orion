@@ -10,7 +10,7 @@ pub trait Parser {
 
 // TODO: handle more values
 // TODO: only use Post struct?
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct ParsedData {
     pub title: String,
     pub description: String,
@@ -19,10 +19,13 @@ pub struct ParsedData {
     pub image: String,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Eq, PartialEq)]
 pub enum ParserError {
     #[error("Empty value for parsed file")]
     EmptyValueError,
+
+    #[error("A required field is missing")]
+    MissingRequiredFieldError,
 
     #[error("Could not parse markdown field: {0}")]
     MarkdownError(#[from] gray_matter::Error),
