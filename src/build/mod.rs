@@ -8,7 +8,7 @@ use crate::build::parser::markdown::MarkdownParser;
 use crate::build::parser::Parser;
 use crate::build::rss::rss;
 use crate::build::sitemap::sitemap;
-use crate::build::types::{BuildError, IndexPage, Post};
+use crate::build::types::{BuildError, IndexPage, Post, TemplateData};
 use crate::Config;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;
@@ -50,35 +50,33 @@ fn generate_file(config: &Config, posts: &mut Vec<Post>, path: &PathBuf) -> Resu
     fs::read_to_string(path)
         .map_err(BuildError::StdIo)
         .and_then(|contents| Ok(MarkdownParser::new().parse(&contents)?))
-        .and_then(|data| {
-            let post = Post {
-                title: data.title,
-                description: data.description,
-                published_at: data.published_at.format("%Y-%m-%d").to_string(),
-                published_at_raw: data.published_at,
-                content: data.content,
-                image: data.image,
-                canonical: get_canonical_url(&config.base_url, path)?,
-                locale: config.locale.to_string(),
-                sitename: config.site_name.clone(),
-                path: get_html_file_path(path)?,
-                seo: config.seo.clone(),
-                twitter: config.twitter.clone(),
-            };
+        .and_then(|mut post| {
+            post.canonical = get_canonical_url(&config.base_url, path)?;
+            post.path = get_html_file_path(path)?;
+
             posts.push(post.clone());
             Ok(post)
         })
-        .and_then(|post| generate_template(&config.theme, post))
-        .and_then(|(html, post)| save(&config.build_path, post.path, html))
+        .and_then(|post| generate_template(config, post))
+        .and_then(|(html, path)| save(&config.build_path, path, html))
 }
 
-fn generate_template(theme: &str, post: Post) -> Result<(String, Post), BuildError> {
+fn generate_template(config: &Config, post: Post) -> Result<(String, String), BuildError> {
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
-    let template = fs::read_to_string(format!("./themes/{theme}/post.html"))?;
+    let template = fs::read_to_string(format!("./themes/{}/post.html", &config.theme))?;
     tt.add_template("post", &*template)?;
 
-    Ok((tt.render("post", &post)?, post))
+    Ok((
+        tt.render(
+            "post",
+            &TemplateData {
+                post: post.clone(),
+                config: config.clone(),
+            },
+        )?,
+        post.path,
+    ))
 }
 
 fn get_canonical_url(base_url: &str, path: &Path) -> Result<String, BuildError> {

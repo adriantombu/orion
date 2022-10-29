@@ -1,22 +1,12 @@
 pub mod markdown;
 
-use chrono::{DateTime, Utc};
+use crate::build::types::Post;
+use serde::Deserialize;
 use thiserror::Error;
 
 pub trait Parser {
     fn new() -> Self;
-    fn parse(&self, text: &str) -> Result<ParsedData, ParserError>;
-}
-
-// TODO: handle more values
-// TODO: only use Post struct?
-#[derive(Debug, Eq, PartialEq)]
-pub struct ParsedData {
-    pub title: String,
-    pub description: String,
-    pub published_at: DateTime<Utc>,
-    pub content: String,
-    pub image: String,
+    fn parse(&self, text: &str) -> Result<Post, ParserError>;
 }
 
 #[derive(Error, Debug, Eq, PartialEq)]
@@ -29,4 +19,13 @@ pub enum ParserError {
 
     #[error("Could not parse date field: {0}")]
     DateParse(#[from] chrono::ParseError),
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ParsedData {
+    pub title: String,
+    pub description: String,
+    pub published_at: String,
+    pub image: Option<String>,
+    pub content: Option<String>,
 }

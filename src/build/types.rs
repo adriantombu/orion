@@ -1,5 +1,6 @@
 use crate::build::parser::ParserError;
 use crate::config::{Seo, Twitter};
+use crate::Config;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use thiserror::Error;
@@ -36,7 +37,7 @@ pub enum BuildError {
     Rss(#[from] RssError),
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, Eq, PartialEq)]
 pub struct Post {
     pub title: String,
     pub description: String,
@@ -45,11 +46,7 @@ pub struct Post {
     pub content: String,
     pub image: String,
     pub canonical: String,
-    pub locale: String,
-    pub sitename: String,
     pub path: String,
-    pub seo: Seo,
-    pub twitter: Twitter,
 }
 
 #[derive(Debug, Serialize, Clone)]
@@ -61,4 +58,10 @@ pub struct IndexPage {
     pub posts: Vec<Post>,
     pub seo: Seo,
     pub twitter: Twitter,
+}
+
+#[derive(Debug, Serialize, Clone)]
+pub struct TemplateData {
+    pub post: Post,
+    pub config: Config,
 }
