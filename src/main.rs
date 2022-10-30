@@ -27,8 +27,8 @@ enum Commands {
     /// Create a new empty post
     #[clap(arg_required_else_help = true)]
     Post {
-        /// The filename of the post
-        name: String,
+        /// The slug of the post
+        slug: String,
     },
 
     /// Builds the blog to html
@@ -54,7 +54,7 @@ fn main() {
     let args = Cli::parse();
 
     match args.command {
-        Commands::Post { name } => post::run(&name),
+        Commands::Post { slug } => post::run(&slug).expect("Error while creating a new post"),
         Commands::Build => build::run().expect("Error while building"),
         Commands::Init { path } => {
             init::run(&path).expect("Error while initializing a new Orion project")

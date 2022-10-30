@@ -18,3 +18,4 @@ fs_extra = "1.2.0"
 chrono = { version = "0.4", features = ["serde"] }
 sitewriter = "0.5.3"
 rss = "2.0.1"
+slug = "0.1.4"

@@ -4,8 +4,8 @@ Orion
 A static site generator written in Rust to create a simple blog from Markdown files.
 
 ### CLI Actions
-* `orion init [PATH]` : create a new Orion directory to start a new blog (with a few fake posts)
-* `orion post [FILENAME]` : create a new Markdown post
+* `orion init [PATH]` : create a directory to start a new Orion blog (with a few fake posts)
+* `orion post [SLUG]` : create a new Markdown post
 * `orion build` : export the Markdown to html
 * `orion serve [-b|--build]` : optionnaly build and start a local server to show your blog
 * `orion --version` : display the current version of Orion
