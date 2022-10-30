@@ -16,7 +16,7 @@ You can use the `--help` or `-h` flag for each action to know more
 ```
 .
 ├── posts
-├── config.yaml
+├── config.toml
 ├── public
 ├── static
 └── themes
@@ -25,7 +25,7 @@ You can use the `--help` or `-h` flag for each action to know more
 `/posts`
 Contains all the markdown files for your posts
 
-`config.yaml`
+`config.toml`
 The configuration of your site
 
 `/public`
@@ -38,29 +38,14 @@ All the assets you want to use (images for posts, for exemple)
 It contains the different themes you can use, each folder representing a them with it's own assets: html layout, css, images, ...
 
 ### Front matter
-We can use the following values in posts, which will be located at the top of the file in between `---`.
-
-Some of those values can be set globally in the `config.yaml` file
+You can use the following values in your posts, which will be located at the top of the file in between `---`.
 
 ```
 ---
 title: My great title
 description: This is a small summary of my post
-slug: my-super-slug
-canonical:
-robots:
-published_at:
-template:
-
-opengraph:
-    type:
-    image:
-    site_name:
-
-twitter:
-    card:
-    site:
-    creator
+published_at: 2022-11-01 11:12:13
+image: https://www.publicdomainpictures.net/pictures/220000/velka/orion-nebula.jpg
 ---
 
 The actual markdown content
