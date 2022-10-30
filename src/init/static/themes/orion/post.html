@@ -1,27 +1,27 @@
 <!DOCTYPE html>
 <html lang="fr">
   <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="{description}" />
-    <meta name="robots" content="{seo.robots}" />
+    <meta name="description" content="{post.description}" />
+    <meta name="robots" content="{config.seo.robots}" />
 
-    <meta property="og:site_name" content="{sitename}" />
-    <meta property="og:locale" content="{locale}" />
+    <meta property="og:site_name" content="{config.site_name}" />
+    <meta property="og:locale" content="{config.locale}" />
     <meta property="og:type" content="article" />
-    <meta property="og:title" content="{title}" />
-    <meta property="og:url" content="{canonical}" /> 
-    <meta property="og:image" content="{image}" />
-    <meta property="og:description" content="{description}" />
-    <meta property="article:published_time" content="{published_at_raw}" />
+    <meta property="og:title" content="{post.title}" />
+    <meta property="og:url" content="{post.canonical}" />
+    <meta property="og:image" content="{post.image}" />
+    <meta property="og:description" content="{post.description}" />
+    <meta property="article:published_time" content="{post.published_at_raw}" />
 
     <meta name="twitter:card" content="summary" />
-    <meta name="twitter:creator" content="{twitter.creator}" />
+    <meta name="twitter:creator" content="{config.twitter.creator}" />
 
-    <title>{title} - {sitename}</title>
+    <title>{post.title} - {config.site_name}</title>
 
     <link rel="icon" href="./favicon.png" />
-    <link rel="canonical" href="{canonical}" />
+    <link rel="canonical" href="{post.canonical}" />
     <link href="./style.css" rel="stylesheet" type="text/css" />
     <link href="./rss.xml" type="application/rss+xml" />
   </head>
@@ -32,7 +32,7 @@
     </header>
 
     <article>
-      {content}
+      {post.content}
     </article>
   </body>
 </html>

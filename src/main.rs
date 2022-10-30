@@ -52,12 +52,13 @@ enum Commands {
 // TODO: use anyhow instead of thiserror
 fn main() {
     let args = Cli::parse();
-    let config = Config::new().expect("Unable to retrieve configuration");
 
     match args.command {
         Commands::Post { name } => post::run(&name),
-        Commands::Build => build::run(&config).expect("Error while building"),
-        Commands::Init { path } => init::run(&path),
-        Commands::Serve { build } => serve::run(build, &config),
+        Commands::Build => build::run().expect("Error while building"),
+        Commands::Init { path } => {
+            init::run(&path).expect("Error while initializing a new Orion project")
+        }
+        Commands::Serve { build } => serve::run(build),
     }
 }

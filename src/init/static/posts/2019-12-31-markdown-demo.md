@@ -1,8 +1,7 @@
 ---
 title: A markdown demo
 description: Discover how to write your posts in markdown
-published_at: 2019-12-31
-image: ""
+published_at: 2019-12-31 11:43:08
 ---
 
 ### Headings

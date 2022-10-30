@@ -18,8 +18,9 @@ use std::path::{Path, PathBuf};
 use tinytemplate::{format_unescaped, TinyTemplate};
 
 /// Builds the blog to html
-pub fn run(config: &Config) -> Result<(), BuildError> {
+pub fn run() -> Result<(), BuildError> {
     println!("Building the blog");
+    let config = &Config::new().expect("Unable to retrieve configuration");
 
     prepare_build_directory(&config.build_path).and_then(|_| {
         let mut posts: Vec<Post> = vec![];

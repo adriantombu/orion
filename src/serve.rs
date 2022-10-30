@@ -3,12 +3,13 @@ use crate::Config;
 use rouille::Response;
 
 /// Runs a local server to navigate the blog
-pub fn run(build: bool, config: &Config) {
+pub fn run(build: bool) {
     if build {
-        run_build(config).expect("Error while building")
+        run_build().expect("Error while building")
     }
 
     println!("Listening to localhost:1337...");
+    let config = &Config::new().expect("Unable to retrieve configuration");
     let path = config.build_path.clone();
 
     rouille::start_server("localhost:1337", move |request| {

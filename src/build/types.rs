@@ -1,11 +1,10 @@
+use super::{rss::RssError, sitemap::SitemapError};
 use crate::build::parser::ParserError;
 use crate::config::{Seo, Twitter};
 use crate::Config;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
 use thiserror::Error;
-
-use super::{rss::RssError, sitemap::SitemapError};
 
 #[derive(Error, Debug)]
 pub enum BuildError {
