@@ -34,7 +34,7 @@ jobs:
         with:
           toolchain: stable
       - name: Clippy
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all-targets --all-features -- -D warnings
 
 # TODO: deploy to crates.io on new release
 #  publish:

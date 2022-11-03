@@ -71,7 +71,7 @@ fn generate_template(config: &Config, post: Post) -> Result<(String, String), Bu
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
     let template = fs::read_to_string(format!("./themes/{}/post.html", &config.theme))?;
-    tt.add_template("post", &*template)?;
+    tt.add_template("post", &template)?;
 
     Ok((
         tt.render(
@@ -136,7 +136,7 @@ fn generate_index(config: &Config, posts: &[Post]) -> Result<(), BuildError> {
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
     let template = fs::read_to_string(format!("./themes/{}/index.html", config.theme))?;
-    tt.add_template("index", &*template)?;
+    tt.add_template("index", &template)?;
 
     let index = IndexPage {
         title: config.site_name.to_string(),

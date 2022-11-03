@@ -41,11 +41,7 @@ impl Parser for MarkdownParser {
                     published_at: published_at_raw.format("%Y-%m-%d").to_string(),
                     published_at_raw,
                     content,
-                    image: parsed_contents
-                        .data
-                        .image
-                        .clone()
-                        .unwrap_or_else(|| "".to_string()),
+                    image: parsed_contents.data.image.clone().unwrap_or_default(),
                     canonical: "".to_string(),
                     path: "".to_string(),
                 })
