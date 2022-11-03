@@ -7,7 +7,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
       - name: Build
         run: cargo build --release --all-features
 
@@ -15,7 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
       - name: Test
         run: cargo test
 
@@ -23,6 +27,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
       - name: Clippy
         run: cargo clippy -- -D warnings
