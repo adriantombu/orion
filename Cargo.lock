@@ -860,8 +860,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "624a8340c38c1b80fd549087862da4ba43e08858af025b236e509b6649fc13d5"
 
 [[package]]
-name = "orion"
-version = "1.0.0"
+name = "orion-ssg"
+version = "1.0.1"
 dependencies = [
  "chrono",
  "clap",
