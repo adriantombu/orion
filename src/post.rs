@@ -1,4 +1,5 @@
 use anyhow::{Context, Result};
+use console::style;
 use std::fs;
 
 /// Create a new generic post
@@ -6,7 +7,10 @@ pub fn run(file_slug: &str) -> Result<()> {
     let now = chrono::offset::Utc::now().format("%Y-%m-%d");
     let path = format!("posts/{}-{}.md", now, slug::slugify(file_slug));
 
-    println!("Creating a new post to {}", &path);
+    println!(
+        "{}",
+        style(format!("Creating a new post at path {}...", &path)).cyan()
+    );
 
     let template = "---
 title: I'm an amazing title

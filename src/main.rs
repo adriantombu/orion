@@ -9,6 +9,7 @@ mod serve;
 use crate::config::Config;
 use anyhow::Context;
 use clap::{Parser, Subcommand};
+use console::style;
 
 /// A simple static blog generator
 #[derive(Debug, Parser)]
@@ -61,7 +62,7 @@ fn main() {
     };
 
     if let Err(err) = res {
-        eprintln!("{:?}", err);
+        eprintln!("{:?}", style(err).red());
         std::process::exit(1);
     }
 }

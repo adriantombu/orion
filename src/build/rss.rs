@@ -1,12 +1,13 @@
 use super::types::Post;
 use crate::config::Config;
 use anyhow::{Context, Result};
+use console::style;
 use rss::{ChannelBuilder, Item, ItemBuilder};
 
 // TODO: get rid of the rss crate and use a generic xml one
 /// Generate a RSS feed from the list of posts
 pub fn rss<T: std::io::Write>(config: &Config, posts: &[Post], writer: T) -> Result<T> {
-    println!("Generating the RSS feed...");
+    println!("{}", style("Generating the RSS feed...").dim());
 
     ChannelBuilder::default()
         .title(&config.site_name)

@@ -2,13 +2,14 @@ use super::types::Post;
 use crate::config::Config;
 use anyhow::{Context, Result};
 use chrono::Utc;
+use console::style;
 use sitewriter::{ChangeFreq, UrlEntry};
 use std::fs;
 
 // TODO: get rid of the sitewriter crate and use a generic xml one
 /// Generates a sitemap from the list of posts
 pub fn sitemap(config: &Config, posts: &[Post]) -> Result<()> {
-    println!("Generating the sitemap...");
+    println!("{}", style("Generating the sitemap...").dim());
 
     let mut urls = vec![UrlEntry {
         loc: format!("{}index.html", config.base_url)

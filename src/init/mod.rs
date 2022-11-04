@@ -1,4 +1,5 @@
 use anyhow::{anyhow, bail, Context, Result};
+use console::style;
 use rust_embed::RustEmbed;
 use std::fs;
 use std::fs::File;
@@ -12,7 +13,10 @@ struct Asset;
 
 /// Initialise a new Orion project
 pub fn run(path: &str) -> Result<()> {
-    println!("Initialize a new Orion project at {}", path);
+    println!(
+        "{}",
+        style(format!("Initialize a new Orion project at {}", &path)).cyan()
+    );
 
     if Path::new(path).exists() {
         bail!("The path at {} does not exists", path.to_string());
@@ -37,7 +41,7 @@ pub fn run(path: &str) -> Result<()> {
 
     Asset::iter().try_for_each(|file| {
         let file_path = format!("{}/{}", path, file);
-        println!("Creating {}", file_path);
+        println!("{}", style(format!("Creating {}...", &file_path)).dim());
 
         let asset = Asset::get(&file)
             .ok_or_else(|| anyhow!("The embeded asset was not found at path: {}", &file))?;

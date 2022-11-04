@@ -11,6 +11,7 @@ use crate::build::sitemap::sitemap;
 use crate::build::types::{IndexPage, Post, TemplateData};
 use crate::Config;
 use anyhow::{anyhow, Context, Result};
+use console::style;
 use fs_extra::dir::{copy, CopyOptions};
 use glob::{glob, GlobError};
 use rayon::prelude::*;
@@ -21,7 +22,8 @@ use tinytemplate::{format_unescaped, TinyTemplate};
 
 /// Builds the blog to html
 pub fn run() -> Result<()> {
-    println!("Building the blog");
+    println!("{}", style("Building the blog...").cyan());
+
     let config = &Config::new().context("Failed to retrieve the configuration")?;
 
     prepare_build_directory(&config.build_path).and_then(|_| {
@@ -165,7 +167,7 @@ fn get_file_name(path: &Path) -> Result<String> {
 }
 
 fn save(build_path: &Path, post: Post, html: String) -> Result<Post> {
-    println!("Saving to {}...", post.path);
+    println!("{}", style(format!("Saving to {}...", &post.path)).dim());
 
     fs::write(
         format!("{}/{}", build_path.display(), post.path),
@@ -176,7 +178,7 @@ fn save(build_path: &Path, post: Post, html: String) -> Result<Post> {
 }
 
 fn copy_static_assets(config: &Config) -> Result<()> {
-    println!("Copying static assets...");
+    println!("{}", style("Copying static assets...").dim());
 
     let favicon_from = &format!("./themes/{}/favicon.png", config.theme);
     let favicon_to = &format!("{}/favicon.png", config.build_path.display());
@@ -209,7 +211,7 @@ fn copy_static_assets(config: &Config) -> Result<()> {
 }
 
 fn generate_index(config: &Config, posts: &[Post]) -> Result<()> {
-    println!("Generating the index page...");
+    println!("{}", style("Generating the index page...").dim());
 
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
