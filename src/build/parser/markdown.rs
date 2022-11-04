@@ -1,5 +1,6 @@
-use crate::build::parser::{ParsedData, Parser, ParserError};
+use crate::build::parser::{ParsedData, Parser};
 use crate::build::types::Post;
+use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use gray_matter::engine::YAML;
 use gray_matter::Matter;
@@ -16,10 +17,10 @@ impl Parser for MarkdownParser {
         }
     }
 
-    fn parse(&self, text: &str) -> Result<Post, ParserError> {
+    fn parse(&self, text: &str) -> Result<Post> {
         self.matter
             .parse_with_struct::<ParsedData>(text)
-            .ok_or(ParserError::MissingRequiredField)
+            .ok_or_else(|| anyhow!("Missing required field"))
             .and_then(|parsed_contents| {
                 let mut content = String::new();
                 html::push_html(
@@ -31,7 +32,13 @@ impl Parser for MarkdownParser {
                     NaiveDateTime::parse_from_str(
                         &parsed_contents.data.published_at,
                         "%Y-%m-%d %H:%M:%S",
-                    )?,
+                    )
+                    .with_context(|| {
+                        format!(
+                            "Failed to parse date {} from string",
+                            &parsed_contents.data.published_at
+                        )
+                    })?,
                     Utc,
                 );
 
@@ -42,8 +49,8 @@ impl Parser for MarkdownParser {
                     published_at_raw,
                     content,
                     image: parsed_contents.data.image.clone().unwrap_or_default(),
-                    canonical: "".to_string(),
-                    path: "".to_string(),
+                    canonical: Default::default(),
+                    path: Default::default(),
                 })
             })
     }
@@ -52,7 +59,7 @@ impl Parser for MarkdownParser {
 #[cfg(test)]
 mod build_tests {
     use crate::build::parser::markdown::MarkdownParser;
-    use crate::build::parser::{Parser, ParserError};
+    use crate::build::parser::Parser;
     use crate::build::types::Post;
     use chrono::{DateTime, NaiveDateTime, Utc};
 
@@ -68,7 +75,6 @@ mod build_tests {
         let res = MarkdownParser::new().parse(contents);
 
         assert!(res.is_err());
-        assert_eq!(res.err(), Some(ParserError::MissingRequiredField));
     }
 
     #[test]

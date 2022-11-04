@@ -7,7 +7,9 @@ mod post;
 mod serve;
 
 use crate::config::Config;
+use anyhow::Context;
 use clap::{Parser, Subcommand};
+use console::style;
 
 /// A simple static blog generator
 #[derive(Debug, Parser)]
@@ -49,16 +51,18 @@ enum Commands {
     },
 }
 
-// TODO: use anyhow instead of thiserror
 fn main() {
     let args = Cli::parse();
 
-    match args.command {
-        Commands::Post { slug } => post::run(&slug).expect("Error while creating a new post"),
-        Commands::Build => build::run().expect("Error while building"),
-        Commands::Init { path } => {
-            init::run(&path).expect("Error while initializing a new Orion project")
-        }
-        Commands::Serve { build } => serve::run(build),
+    let res = match args.command {
+        Commands::Post { slug } => post::run(&slug).context("Failed to create a new post"),
+        Commands::Build => build::run().context("Failed to build the blog"),
+        Commands::Init { path } => init::run(&path).context("Failed to initialize a new project"),
+        Commands::Serve { build } => serve::run(build).context("Failed to serve the blog locally"),
+    };
+
+    if let Err(err) = res {
+        eprintln!("{:?}", style(err).red());
+        std::process::exit(1);
     }
 }
