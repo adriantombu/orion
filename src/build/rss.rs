@@ -1,14 +1,14 @@
 use super::types::Post;
 use crate::config::Config;
+use anyhow::{Context, Result};
 use rss::{ChannelBuilder, Item, ItemBuilder};
-use thiserror::Error;
 
 // TODO: get rid of the rss crate and use a generic xml one
 /// Generate a RSS feed from the list of posts
-pub fn rss<T: std::io::Write>(config: &Config, posts: &[Post], writer: T) -> Result<T, RssError> {
-    println!("Generating RSS...");
+pub fn rss<T: std::io::Write>(config: &Config, posts: &[Post], writer: T) -> Result<T> {
+    println!("Generating the RSS feed...");
 
-    Ok(ChannelBuilder::default()
+    ChannelBuilder::default()
         .title(&config.site_name)
         .link(&config.base_url)
         .description(&config.description)
@@ -28,16 +28,8 @@ pub fn rss<T: std::io::Write>(config: &Config, posts: &[Post], writer: T) -> Res
                 .collect::<Vec<Item>>(),
         )
         .build()
-        .write_to(writer)?)
-}
-
-#[derive(Error, Debug)]
-pub enum RssError {
-    #[error("Unable to write sitemap file: {0}")]
-    StdIo(#[from] std::io::Error),
-
-    #[error("Unable to write sitemap file: {0}")]
-    RssCrate(#[from] rss::Error),
+        .write_to(writer)
+        .context("Failed to consume the writer")
 }
 
 #[cfg(test)]

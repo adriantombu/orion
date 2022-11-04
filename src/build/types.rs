@@ -1,40 +1,7 @@
-use super::{rss::RssError, sitemap::SitemapError};
-use crate::build::parser::ParserError;
 use crate::config::{Seo, Twitter};
 use crate::Config;
 use chrono::{DateTime, Utc};
 use serde::Serialize;
-use thiserror::Error;
-
-#[derive(Error, Debug)]
-pub enum BuildError {
-    #[error("{0}")]
-    Pattern(#[from] glob::PatternError),
-
-    #[error("{0}")]
-    Glob(#[from] glob::GlobError),
-
-    #[error("{0}")]
-    StdIo(#[from] std::io::Error),
-
-    #[error("{0}")]
-    Template(#[from] tinytemplate::error::Error),
-
-    #[error("{0}")]
-    FsExtra(#[from] fs_extra::error::Error),
-
-    #[error("Filename is empty")]
-    EmptyFilename,
-
-    #[error("Unable to parse file: {0}")]
-    Parser(#[from] ParserError),
-
-    #[error("Unable to generate sitemap: {0}")]
-    Sitemap(#[from] SitemapError),
-
-    #[error("Unable to generate rss feed: {0}")]
-    Rss(#[from] RssError),
-}
 
 #[derive(Debug, Serialize, Clone, Eq, PartialEq)]
 pub struct Post {

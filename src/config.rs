@@ -1,7 +1,7 @@
+use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::PathBuf;
-use thiserror::Error;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
@@ -26,16 +26,13 @@ pub struct Twitter {
 }
 
 impl Config {
-    pub fn new() -> Result<Self, ConfigError> {
-        Ok(toml::from_str(&fs::read_to_string("./config.toml")?)?)
+    pub fn new() -> Result<Self> {
+        let path = "./config.toml";
+
+        toml::from_str(
+            &fs::read_to_string("./config.toml")
+                .with_context(|| format!("Failed to read at path {}", &path))?,
+        )
+        .context("Failed to parse the config file to TOML")
     }
-}
-
-#[derive(Error, Debug)]
-pub enum ConfigError {
-    #[error("Unable to read config file: {0}")]
-    StdIoError(#[from] std::io::Error),
-
-    #[error("Unable to parse config file: {0}")]
-    TomlDeserializeError(#[from] toml::de::Error),
 }

@@ -1,12 +1,12 @@
+use anyhow::{Context, Result};
 use std::fs;
-use thiserror::Error;
 
 /// Create a new generic post
-pub fn run(file_slug: &str) -> Result<(), NewPostError> {
+pub fn run(file_slug: &str) -> Result<()> {
     let now = chrono::offset::Utc::now().format("%Y-%m-%d");
     let path = format!("posts/{}-{}.md", now, slug::slugify(file_slug));
 
-    println!("Creating a new post to {}", path);
+    println!("Creating a new post to {}", &path);
 
     let template = "---
 title: I'm an amazing title
@@ -28,11 +28,5 @@ Phasellus eleifend at nunc a molestie :
 Vestibulum aliquet metus nulla, sit [amet ultrices dolor](index.html) sodales ac. Morbi risus quam, sagittis et augue eu, rhoncus imperdiet odio. Aenean ac condimentum ipsum. 
 ";
 
-    Ok(fs::write(path, template)?)
-}
-
-#[derive(Error, Debug)]
-pub enum NewPostError {
-    #[error("{0}")]
-    StdIo(#[from] std::io::Error),
+    fs::write(&path, template).with_context(|| format!("Failed to write to path {}", path))
 }
