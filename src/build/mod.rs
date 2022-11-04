@@ -11,7 +11,8 @@ use crate::build::sitemap::sitemap;
 use crate::build::types::{BuildError, IndexPage, Post, TemplateData};
 use crate::Config;
 use fs_extra::dir::{copy, CopyOptions};
-use glob::glob;
+use glob::{glob, GlobError};
+use rayon::prelude::*;
 use std::fs;
 use std::fs::File;
 use std::path::{Path, PathBuf};
@@ -23,15 +24,18 @@ pub fn run() -> Result<(), BuildError> {
     let config = &Config::new().expect("Unable to retrieve configuration");
 
     prepare_build_directory(&config.build_path).and_then(|_| {
-        let mut posts: Vec<Post> = vec![];
-
-        glob("./posts/*.md")?
-            .try_for_each(|entry| entry.map(|path| generate_file(config, &mut posts, &path))?)
-            .and_then(|_| copy_static_assets(config))?;
+        let mut posts = glob("./posts/*.md")?
+            .collect::<Vec<_>>()
+            .into_par_iter()
+            .map(|entry| entry.map(|path| generate_file(config, &path)))
+            .collect::<Result<Vec<Result<Post, BuildError>>, GlobError>>()?
+            .into_iter()
+            .collect::<Result<Vec<Post>, BuildError>>()?;
 
         // Order by descending publication date
         posts.sort_by_key(|p| -p.published_at_raw.timestamp());
 
+        copy_static_assets(config)?;
         generate_index(config, &posts)?;
         sitemap(config, &posts)?;
         rss(
@@ -52,22 +56,20 @@ fn prepare_build_directory(build_path: &Path) -> Result<(), BuildError> {
     Ok(fs::create_dir_all(build_path)?)
 }
 
-fn generate_file(config: &Config, posts: &mut Vec<Post>, path: &PathBuf) -> Result<(), BuildError> {
+fn generate_file(config: &Config, path: &PathBuf) -> Result<Post, BuildError> {
     fs::read_to_string(path)
         .map_err(BuildError::StdIo)
         .and_then(|contents| Ok(MarkdownParser::new().parse(&contents)?))
         .and_then(|mut post| {
             post.canonical = get_canonical_url(&config.base_url, path)?;
             post.path = get_html_file_path(path)?;
-
-            posts.push(post.clone());
             Ok(post)
         })
         .and_then(|post| generate_template(config, post))
-        .and_then(|(html, path)| save(&config.build_path, path, html))
+        .and_then(|(html, post)| save(&config.build_path, post, html))
 }
 
-fn generate_template(config: &Config, post: Post) -> Result<(String, String), BuildError> {
+fn generate_template(config: &Config, post: Post) -> Result<(String, Post), BuildError> {
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
     let template = fs::read_to_string(format!("./themes/{}/post.html", &config.theme))?;
@@ -81,7 +83,7 @@ fn generate_template(config: &Config, post: Post) -> Result<(String, String), Bu
                 config: config.clone(),
             },
         )?,
-        post.path,
+        post,
     ))
 }
 
@@ -103,13 +105,15 @@ fn get_file_name(path: &Path) -> Result<String, BuildError> {
         .to_string())
 }
 
-fn save(build_path: &Path, file_path: String, html: String) -> Result<(), BuildError> {
-    println!("Saving to {}...", file_path);
+fn save(build_path: &Path, post: Post, html: String) -> Result<Post, BuildError> {
+    println!("Saving to {}...", post.path);
 
-    Ok(fs::write(
-        format!("{}/{}", build_path.display(), file_path),
+    fs::write(
+        format!("{}/{}", build_path.display(), post.path),
         html.as_bytes(),
-    )?)
+    )?;
+
+    Ok(post)
 }
 
 fn copy_static_assets(config: &Config) -> Result<(), BuildError> {

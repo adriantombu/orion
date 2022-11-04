@@ -26,3 +26,4 @@ chrono = { version = "0.4", features = ["serde"] }
 sitewriter = "0.5.3"
 rss = "2.0.1"
 slug = "0.1.4"
+rayon = "1.5.3"

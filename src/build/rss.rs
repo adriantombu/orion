@@ -3,7 +3,8 @@ use crate::config::Config;
 use rss::{ChannelBuilder, Item, ItemBuilder};
 use thiserror::Error;
 
-// Generate a RSS feed from the list of posts
+// TODO: get rid of the rss crate and use a generic xml one
+/// Generate a RSS feed from the list of posts
 pub fn rss<T: std::io::Write>(config: &Config, posts: &[Post], writer: T) -> Result<T, RssError> {
     println!("Generating RSS...");
 

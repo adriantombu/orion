@@ -5,6 +5,7 @@ use sitewriter::{ChangeFreq, UrlEntry};
 use std::fs;
 use thiserror::Error;
 
+// TODO: get rid of the sitewriter crate and use a generic xml one
 /// Generates a sitemap from the list of posts
 pub fn sitemap(config: &Config, posts: &[Post]) -> Result<(), SitemapError> {
     println!("Generating sitemap...");
