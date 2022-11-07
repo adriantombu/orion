@@ -7,7 +7,7 @@ A static site generator written in Rust to create a simple blog from Markdown fi
 * `orion init [PATH]` : create a directory to start a new Orion blog (with a few fake posts)
 * `orion post [SLUG]` : create a new Markdown post
 * `orion build` : export the Markdown to html
-* `orion serve [-b|--build]` : optionnaly build and start a local server to show your blog
+* `orion serve [-b|--build]` : optionally build and start a local server to test your build
 * `orion --version` : display the current version of Orion
 
 You can use the `--help` or `-h` flag for each action to know more
@@ -16,6 +16,7 @@ You can use the `--help` or `-h` flag for each action to know more
 ```
 .
 ├── posts
+├── build.sh
 ├── config.toml
 ├── public
 ├── static
@@ -25,6 +26,9 @@ You can use the `--help` or `-h` flag for each action to know more
 `/posts`
 Contains all the markdown files for your posts
 
+`build.sh`
+A build script to use in CI/CD environments
+
 `config.toml`
 The configuration of your site
 
@@ -32,13 +36,13 @@ The configuration of your site
 The build directory (the files that will be deployed into production)
 
 `/static`
-All the assets you want to use (images for posts, for exemple)
+All the assets you want to use (images for your posts, for example)
 
 `/themes`
-It contains the different themes you can use, each folder representing a them with it's own assets: html layout, css, images, ...
+It contains the different themes you can use, each folder representing them with its own assets: html layout, css, images, ...
 
 ### Front matter
-You can use the following values in your posts, which will be located at the top of the file in between `---`.
+You can use the following values in your posts. They will be located at the top of the file in between `---`.
 
 ```
 ---
