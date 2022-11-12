@@ -30,8 +30,8 @@ impl Config {
         let path = "./config.toml";
 
         toml::from_str(
-            &fs::read_to_string("./config.toml")
-                .with_context(|| format!("Failed to read at path {}", &path))?,
+            &fs::read_to_string(path)
+                .with_context(|| format!("Failed to read at path {}", path))?,
         )
         .context("Failed to parse the config file to TOML")
     }
