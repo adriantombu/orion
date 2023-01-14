@@ -1,6 +1,6 @@
 [package]
 name = "orion-ssg"
-version = "1.0.5"
+version = "1.0.6"
 edition = "2021"
 authors = ["Adrian Tombu <adrian@otso.fr>"]
 keywords = ["generator", "static", "markdown", "html", "blog"]
