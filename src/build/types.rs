@@ -14,6 +14,7 @@ pub struct Post {
     pub canonical: String,
     pub path: String,
     pub locale: String,
+    pub draft: bool,
 }
 
 #[derive(Debug, Serialize, Clone)]

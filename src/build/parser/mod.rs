@@ -17,4 +17,5 @@ pub struct ParsedData {
     pub image: Option<String>,
     pub content: Option<String>,
     pub locale: Option<String>,
+    pub draft: Option<bool>,
 }

@@ -13,7 +13,7 @@ use crate::Config;
 use anyhow::{anyhow, Context, Result};
 use console::style;
 use fs_extra::dir::{copy, CopyOptions};
-use glob::{glob, GlobError};
+use glob::glob;
 use rayon::prelude::*;
 use std::fs;
 use std::fs::File;
@@ -27,16 +27,21 @@ pub fn run() -> Result<()> {
     let config = &Config::new().context("Failed to retrieve the configuration")?;
 
     prepare_build_directory(&config.build_path).and_then(|_| {
-        let mut posts = glob("posts/*.md")
+        let files = glob("posts/*.md")
             .context("Failed to read the md files at path posts/")?
-            .collect::<Vec<_>>()
+            .par_bridge()
+            .filter_map(|res| res.ok())
+            .collect::<Vec<_>>();
+
+        let mut posts = files
             .into_par_iter()
-            .map(|entry| entry.map(|path| generate_file(config, &path)))
-            .collect::<Result<Vec<Result<Post>>, GlobError>>()
-            .context("Failed to read the markdown file")?
+            .map(|path| generate_file(config, &path))
+            .collect::<Result<Vec<_>>>()
+            .context("Failed to generate the post")?
             .into_iter()
-            .collect::<Result<Vec<Post>>>()
-            .context("Failed to generate the post")?;
+            .filter(|opt| opt.is_some())
+            .collect::<Option<Vec<_>>>()
+            .unwrap();
 
         // Order by descending publication date
         posts.sort_by_key(|p| -p.published_at_raw.timestamp());
@@ -73,8 +78,8 @@ fn prepare_build_directory(build_path: &Path) -> Result<()> {
     })
 }
 
-fn generate_file(config: &Config, path: &PathBuf) -> Result<Post> {
-    fs::read_to_string(path)
+fn generate_file(config: &Config, path: &PathBuf) -> Result<Option<Post>> {
+    let mut post = fs::read_to_string(path)
         .map_err(|err| {
             anyhow!(
                 "Failed to read the file at path {} with error {}",
@@ -86,34 +91,43 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Post> {
             MarkdownParser::new()
                 .parse(&contents, &config.locale)
                 .with_context(|| format!("Failed to parse the Markdown file at path {:?}", path))
-        })
-        .and_then(|mut post| {
-            post.canonical = get_canonical_url(&config.base_url, path).with_context(|| {
-                format!(
-                    "Failed to generate the canonical url for the file at path {:?}",
-                    path
-                )
-            })?;
-            post.path = get_html_file_path(path).with_context(|| {
-                format!(
-                    "Failed to generate the html path for the file at path {:?}",
-                    path
-                )
-            })?;
-            Ok(post)
-        })
-        .and_then(|post| {
-            generate_template(config, post.clone()).with_context(|| {
-                format!(
-                    "Failed to generate the template for the post at path {}",
-                    post.path
-                )
-            })
+        })?;
+
+    if post.draft {
+        println!(
+            "{}",
+            style(format!("{} is a draft, skipping...", &post.path))
+        );
+
+        return Ok(None);
+    }
+
+    post.canonical = get_canonical_url(&config.base_url, path).with_context(|| {
+        format!(
+            "Failed to generate the canonical url for the file at path {:?}",
+            path
+        )
+    })?;
+    post.path = get_html_file_path(path).with_context(|| {
+        format!(
+            "Failed to generate the html path for the file at path {:?}",
+            path
+        )
+    })?;
+
+    let p = generate_template(config, post.clone())
+        .with_context(|| {
+            format!(
+                "Failed to generate the template for the post at path {}",
+                post.path
+            )
         })
         .and_then(|(html, post)| {
             save(&config.build_path, post.clone(), html)
                 .with_context(|| format!("Failed to save the file at path {}", post.path))
-        })
+        })?;
+
+    Ok(Some(p))
 }
 
 fn generate_template(config: &Config, post: Post) -> Result<(String, Post)> {

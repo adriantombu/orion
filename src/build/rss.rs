@@ -66,7 +66,8 @@ mod build_tests {
             image: "https://placekitten.com/500/500".to_string(),
             canonical: "https://adriantombu.github.io/orion/lorem-ipsum-dolor-sit-amet".to_string(),
             path: "lorem-ipsum-dolor-sit-amet.html".to_string(),
-            locale: "fr-FR".to_string()
+            locale: "fr-FR".to_string(),
+            draft: false
         }];
         let mut result = Vec::new();
 
