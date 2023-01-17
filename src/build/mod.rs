@@ -84,7 +84,7 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Post> {
         })
         .and_then(|contents| {
             MarkdownParser::new()
-                .parse(&contents)
+                .parse(&contents, &config.locale)
                 .with_context(|| format!("Failed to parse the Markdown file at path {:?}", path))
         })
         .and_then(|mut post| {

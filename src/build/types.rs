@@ -13,6 +13,7 @@ pub struct Post {
     pub image: String,
     pub canonical: String,
     pub path: String,
+    pub locale: String,
 }
 
 #[derive(Debug, Serialize, Clone)]
