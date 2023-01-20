@@ -2,35 +2,20 @@ use crate::build::post::Posts;
 use crate::config::Config;
 use anyhow::{Context, Result};
 use chrono::Utc;
+use console::style;
 use sitewriter::{ChangeFreq, UrlEntry};
-use std::fs;
 
 // TODO: get rid of the sitewriter crate and use a generic xml one
 #[derive(Debug)]
-pub struct Sitemap<'a> {
-    config: &'a Config,
-    posts: &'a Posts,
-    urls: Option<Vec<UrlEntry>>,
-}
+pub struct Sitemap(String);
 
-impl Sitemap<'_> {
-    pub fn new<'a>(config: &'a Config, posts: &'a Posts) -> Sitemap<'a> {
-        Sitemap {
-            config,
-            posts,
-            urls: None,
-        }
-    }
-
-    pub fn generate(&self) -> Result<Self> {
+impl Sitemap {
+    pub fn new(config: &Config, posts: &Posts) -> Result<Sitemap> {
         let mut urls = vec![UrlEntry {
-            loc: format!("{}index.html", self.config.base_url)
+            loc: format!("{}index.html", config.base_url)
                 .parse()
                 .with_context(|| {
-                    format!(
-                        "Failed to parse the config base_url {}",
-                        self.config.base_url
-                    )
+                    format!("Failed to parse the config base_url {}", config.base_url)
                 })?,
             changefreq: Some(ChangeFreq::Monthly),
             priority: Some(1.0),
@@ -38,7 +23,7 @@ impl Sitemap<'_> {
         }];
 
         let mut priority = 1.00;
-        self.posts
+        posts
             .get()
             .try_for_each(|p| -> Result<()> {
                 urls.push(UrlEntry {
@@ -56,25 +41,14 @@ impl Sitemap<'_> {
             })
             .context("Failed to generate the list of posts")?;
 
-        Ok(Sitemap {
-            config: self.config,
-            posts: self.posts,
-            urls: Some(urls),
-        })
+        Ok(Sitemap(sitewriter::generate_str(&urls)))
     }
 
-    pub fn save_to_file(self) -> Result<()> {
-        let build_path = self.config.build_path.display();
+    pub fn write<T: std::io::Write>(&self, mut writer: T) -> Result<usize> {
+        println!("{}", style("Saving the sitemap...").dim());
 
-        fs::write(
-            format!("{}/sitemap.xml", build_path),
-            sitewriter::generate_str(&self.urls.unwrap_or_default()).as_bytes(),
-        )
-        .with_context(|| {
-            format!(
-                "Failed to write the sitemap at path {}/sitemap.xml",
-                build_path
-            )
-        })
+        writer
+            .write(self.0.as_bytes())
+            .context("Failed to consume the sitemap writer")
     }
 }

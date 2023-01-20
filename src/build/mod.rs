@@ -1,3 +1,5 @@
+mod assets;
+mod index;
 mod parser;
 mod post;
 mod rss;
@@ -5,16 +7,17 @@ mod sitemap;
 mod tests;
 mod types;
 
+use crate::build::assets::Assets;
+use crate::build::index::Index;
 use crate::build::parser::markdown::MarkdownParser;
 use crate::build::parser::Parser;
 use crate::build::post::{Post, Posts};
 use crate::build::rss::Rss;
 use crate::build::sitemap::Sitemap;
-use crate::build::types::{IndexPage, TemplateData};
+use crate::build::types::TemplateData;
 use crate::Config;
 use anyhow::{anyhow, Context, Result};
 use console::style;
-use fs_extra::dir::{copy, CopyOptions};
 use glob::glob;
 use rayon::prelude::*;
 use std::fs;
@@ -48,12 +51,18 @@ pub fn run() -> Result<()> {
         );
         posts.sort_date_desc();
 
-        copy_static_assets(config).context("Failed to copy the static assets")?;
-        generate_index(config, &posts).context("Failed to generate the index page")?;
-        Sitemap::new(config, &posts)
-            .generate()?
-            .save_to_file()
-            .context("Failed to generate the sitemap")?;
+        Assets::copy(config).context("Failed to copy the static assets")?;
+        Index::new(config, &posts)?
+            .write(
+                &mut File::create(format!("{}/index.html", config.build_path.display()))
+                    .context("Failed to generate the RSS feed")?,
+                config,
+            )
+            .context("Failed to generate the index page")?;
+        Sitemap::new(config, &posts)?.write(
+            &mut File::create(format!("{}/sitemap.xml", config.build_path.display()))
+                .context("Failed to generate the sitemap")?,
+        )?;
         Rss::new(config, &posts).write(
             &mut File::create(format!("{}/rss.xml", config.build_path.display()))
                 .context("Failed to generate the RSS feed")?,
@@ -192,68 +201,4 @@ fn save(build_path: &Path, post: Post, html: String) -> Result<Post> {
     )?;
 
     Ok(post)
-}
-
-fn copy_static_assets(config: &Config) -> Result<()> {
-    println!("{}", style("Copying static assets...").dim());
-
-    let favicon_from = &format!("./themes/{}/favicon.png", config.theme);
-    let favicon_to = &format!("{}/favicon.png", config.build_path.display());
-    fs::copy(favicon_from, favicon_to).with_context(|| {
-        format!(
-            "Failed to copy favicon from {} to {}",
-            favicon_from, favicon_to
-        )
-    })?;
-
-    let style_from = &format!("./themes/{}/style.css", config.theme);
-    let style_to = &format!("{}/style.css", config.build_path.display());
-    fs::copy(style_from, style_to).with_context(|| {
-        format!(
-            "Failed to copy stylesheet from {} to {}",
-            style_from, style_to
-        )
-    })?;
-
-    let images_from = "./static/images";
-    let images_to = &config.build_path;
-    copy(images_from, images_to, &CopyOptions::new()).with_context(|| {
-        format!(
-            "Failed to copy images from {} to {:?}",
-            images_from, images_to
-        )
-    })?;
-
-    Ok(())
-}
-
-fn generate_index(config: &Config, posts: &Posts) -> Result<()> {
-    println!("{}", style("Generating the index page...").dim());
-
-    let mut tt = TinyTemplate::new();
-    tt.set_default_formatter(&format_unescaped);
-
-    let template_path = &format!("./themes/{}/index.html", &config.theme);
-    let template = fs::read_to_string(template_path)
-        .with_context(|| format!("Failed to read the template file at path {}", template_path))?;
-    tt.add_template("index", &template)
-        .context("Failed to build the index template ")?;
-
-    let index = IndexPage {
-        title: &config.site_name,
-        description: &config.description,
-        canonical: &config.base_url,
-        locale: &config.locale,
-        posts,
-        seo: &config.seo,
-        twitter: &config.twitter,
-    };
-
-    let data = tt
-        .render("index", &index)
-        .context("Failed to render the index template")?;
-
-    let index_path = &format!("{}/index.html", config.build_path.display());
-    fs::write(index_path, data.as_bytes())
-        .with_context(|| format!("Failed to write file at path {}", index_path))
 }

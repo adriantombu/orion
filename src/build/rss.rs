@@ -39,7 +39,7 @@ impl Rss {
 
         self.0
             .write_to(writer)
-            .context("Failed to consume the writer")
+            .context("Failed to consume the rss writer")
     }
 }
 
