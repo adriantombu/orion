@@ -3,7 +3,6 @@ use anyhow::{Context, Result};
 use console::style;
 use fs_extra::dir::{copy, CopyOptions};
 use serde::Serialize;
-use std::fs;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct Assets {}
@@ -12,21 +11,12 @@ impl Assets {
     pub fn copy(config: &Config) -> Result<()> {
         println!("{}", style("Copying static assets...").dim());
 
-        let favicon_from = &format!("./themes/{}/favicon.png", config.theme);
-        let favicon_to = &format!("{}/favicon.png", config.build_path.display());
-        fs::copy(favicon_from, favicon_to).with_context(|| {
+        let theme_from = &format!("./themes/{}/assets", config.theme);
+        let theme_to = &config.build_path;
+        copy(theme_from, theme_to, &CopyOptions::new()).with_context(|| {
             format!(
-                "Failed to copy favicon from {} to {}",
-                favicon_from, favicon_to
-            )
-        })?;
-
-        let style_from = &format!("./themes/{}/style.css", config.theme);
-        let style_to = &format!("{}/style.css", config.build_path.display());
-        fs::copy(style_from, style_to).with_context(|| {
-            format!(
-                "Failed to copy stylesheet from {} to {}",
-                style_from, style_to
+                "Failed to copy theme assets from {} to {:?}",
+                theme_from, theme_to
             )
         })?;
 
