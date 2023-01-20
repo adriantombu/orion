@@ -1,4 +1,5 @@
 mod parser;
+mod post;
 mod rss;
 mod sitemap;
 mod tests;
@@ -6,9 +7,10 @@ mod types;
 
 use crate::build::parser::markdown::MarkdownParser;
 use crate::build::parser::Parser;
-use crate::build::rss::rss;
-use crate::build::sitemap::sitemap;
-use crate::build::types::{IndexPage, Post, TemplateData};
+use crate::build::post::{Post, Posts};
+use crate::build::rss::Rss;
+use crate::build::sitemap::Sitemap;
+use crate::build::types::{IndexPage, TemplateData};
 use crate::Config;
 use anyhow::{anyhow, Context, Result};
 use console::style;
@@ -33,25 +35,26 @@ pub fn run() -> Result<()> {
             .filter_map(|res| res.ok())
             .collect::<Vec<_>>();
 
-        let mut posts = files
-            .into_par_iter()
-            .map(|path| generate_file(config, &path))
-            .collect::<Result<Vec<_>>>()
-            .context("Failed to generate the post")?
-            .into_iter()
-            .filter(|opt| opt.is_some())
-            .collect::<Option<Vec<_>>>()
-            .unwrap();
-
-        // Order by descending publication date
-        posts.sort_by_key(|p| -p.published_at_raw.timestamp());
+        let mut posts = Posts::new(
+            files
+                .into_par_iter()
+                .map(|path| generate_file(config, &path))
+                .collect::<Result<Vec<_>>>()
+                .context("Failed to generate the post")?
+                .into_iter()
+                .filter(|opt| opt.is_some())
+                .collect::<Option<Vec<_>>>()
+                .unwrap(),
+        );
+        posts.sort_date_desc();
 
         copy_static_assets(config).context("Failed to copy the static assets")?;
         generate_index(config, &posts).context("Failed to generate the index page")?;
-        sitemap(config, &posts).context("Failed to generate the sitemap")?;
-        rss(
-            config,
-            &posts,
+        Sitemap::new(config, &posts)
+            .generate()?
+            .save_to_file()
+            .context("Failed to generate the sitemap")?;
+        Rss::new(config, &posts).write(
             &mut File::create(format!("{}/rss.xml", config.build_path.display()))
                 .context("Failed to generate the RSS feed")?,
         )?;
@@ -148,8 +151,8 @@ fn generate_template(config: &Config, post: Post) -> Result<(String, Post)> {
         tt.render(
             "post",
             &TemplateData {
-                post: post.clone(),
-                config: config.clone(),
+                post: &post,
+                config,
             },
         )
         .with_context(|| {
@@ -224,7 +227,7 @@ fn copy_static_assets(config: &Config) -> Result<()> {
     Ok(())
 }
 
-fn generate_index(config: &Config, posts: &[Post]) -> Result<()> {
+fn generate_index(config: &Config, posts: &Posts) -> Result<()> {
     println!("{}", style("Generating the index page...").dim());
 
     let mut tt = TinyTemplate::new();
@@ -237,13 +240,13 @@ fn generate_index(config: &Config, posts: &[Post]) -> Result<()> {
         .context("Failed to build the index template ")?;
 
     let index = IndexPage {
-        title: config.site_name.to_string(),
-        description: config.description.to_string(),
-        canonical: config.base_url.to_string(),
-        locale: config.locale.to_string(),
-        posts: posts.to_vec(),
-        seo: config.seo.clone(),
-        twitter: config.twitter.clone(),
+        title: &config.site_name,
+        description: &config.description,
+        canonical: &config.base_url,
+        locale: &config.locale,
+        posts,
+        seo: &config.seo,
+        twitter: &config.twitter,
     };
 
     let data = tt

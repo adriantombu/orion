@@ -1,6 +1,6 @@
 pub mod markdown;
 
-use crate::build::types::Post;
+use crate::build::post::Post;
 use anyhow::Result;
 use serde::Deserialize;
 

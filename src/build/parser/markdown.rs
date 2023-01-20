@@ -1,5 +1,5 @@
 use crate::build::parser::{ParsedData, Parser};
-use crate::build::types::Post;
+use crate::build::post::Post;
 use anyhow::{anyhow, Context, Result};
 use chrono::{DateTime, NaiveDateTime, Utc};
 use gray_matter::engine::YAML;
@@ -65,7 +65,7 @@ impl Parser for MarkdownParser {
 mod build_tests {
     use crate::build::parser::markdown::MarkdownParser;
     use crate::build::parser::Parser;
-    use crate::build::types::Post;
+    use crate::build::post::Post;
     use chrono::{DateTime, NaiveDateTime, Utc};
 
     #[test]

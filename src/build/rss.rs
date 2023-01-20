@@ -1,42 +1,52 @@
-use super::types::Post;
+use crate::build::post::Posts;
 use crate::config::Config;
 use anyhow::{Context, Result};
 use console::style;
-use rss::{ChannelBuilder, Item, ItemBuilder};
+use rss::{Channel, ChannelBuilder, Item, ItemBuilder};
 
 // TODO: get rid of the rss crate and use a generic xml one
-/// Generate a RSS feed from the list of posts
-pub fn rss<T: std::io::Write>(config: &Config, posts: &[Post], writer: T) -> Result<T> {
-    println!("{}", style("Generating the RSS feed...").dim());
+#[derive(Debug)]
+pub struct Rss(Channel);
 
-    ChannelBuilder::default()
-        .title(&config.site_name)
-        .link(&config.base_url)
-        .description(&config.description)
-        .items(
-            posts
-                .iter()
-                .take(5)
-                .map(|p| {
-                    ItemBuilder::default()
-                        .title(p.title.to_string())
-                        .description(p.description.to_string())
-                        .link(p.canonical.to_string())
-                        .pub_date(p.published_at_raw.to_rfc2822())
-                        .content(p.content.to_string())
-                        .build()
-                })
-                .collect::<Vec<Item>>(),
+impl Rss {
+    pub fn new(config: &Config, posts: &Posts) -> Self {
+        Self(
+            ChannelBuilder::default()
+                .title(&config.site_name)
+                .link(&config.base_url)
+                .description(&config.description)
+                .items(
+                    posts
+                        .get()
+                        .take(5)
+                        .map(|p| {
+                            ItemBuilder::default()
+                                .title(p.title.to_string())
+                                .description(p.description.to_string())
+                                .link(p.canonical.to_string())
+                                .pub_date(p.published_at_raw.to_rfc2822())
+                                .content(p.content.to_string())
+                                .build()
+                        })
+                        .collect::<Vec<Item>>(),
+                )
+                .build(),
         )
-        .build()
-        .write_to(writer)
-        .context("Failed to consume the writer")
+    }
+
+    pub fn write<T: std::io::Write>(&self, writer: T) -> Result<T> {
+        println!("{}", style("Saving the RSS feed...").dim());
+
+        self.0
+            .write_to(writer)
+            .context("Failed to consume the writer")
+    }
 }
 
 #[cfg(test)]
 mod build_tests {
-    use crate::build::rss::rss;
-    use crate::build::types::Post;
+    use crate::build::post::{Post, Posts};
+    use crate::build::rss::Rss;
     use crate::config::{Config, Seo, Twitter};
 
     #[test]
@@ -56,7 +66,7 @@ mod build_tests {
                 creator: "adriantombu".to_string(),
             },
         };
-        let posts = vec![Post {
+        let posts = Posts::new(vec![Post {
             title: "Lorem ipsum dolor sit amet".to_string(),
             description: "Morbi sollicitudin libero nisi, eu luctus quam tristique sed."
                 .to_string(),
@@ -68,10 +78,10 @@ mod build_tests {
             path: "lorem-ipsum-dolor-sit-amet.html".to_string(),
             locale: "fr-FR".to_string(),
             draft: false
-        }];
+        }]);
         let mut result = Vec::new();
 
-        let res = rss(&config, &posts, &mut result);
+        let res = Rss::new(&config, &posts).write(&mut result);
 
         assert!(res.is_ok());
         assert!(!res.unwrap().is_empty());
