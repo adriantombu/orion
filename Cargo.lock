@@ -920,7 +920,7 @@ checksum = "6f61fba1741ea2b3d6a1e3178721804bb716a68a6aeba1149b5d52e3d464ea66"
 
 [[package]]
 name = "orion-ssg"
-version = "1.0.7"
+version = "1.0.8"
 dependencies = [
  "anyhow",
  "chrono",

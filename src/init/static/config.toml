@@ -3,7 +3,7 @@ site_name = "Orion"
 description = "A simple static blog generator made with Rust"
 theme = "orion"
 build_path = "./public"
-locale = "fr_FR"
+locale = "en_EN"
 
 [seo]
 robots = "index, follow"
