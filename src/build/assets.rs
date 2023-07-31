@@ -14,19 +14,13 @@ impl Assets {
         let theme_from = &format!("./themes/{}/assets", config.theme);
         let theme_to = &config.build_path;
         copy(theme_from, theme_to, &CopyOptions::new()).with_context(|| {
-            format!(
-                "Failed to copy theme assets from {} to {:?}",
-                theme_from, theme_to
-            )
+            format!("Failed to copy theme assets from {theme_from} to {theme_to:?}")
         })?;
 
         let images_from = "./static/images";
         let images_to = &config.build_path;
         copy(images_from, images_to, &CopyOptions::new()).with_context(|| {
-            format!(
-                "Failed to copy images from {} to {:?}",
-                images_from, images_to
-            )
+            format!("Failed to copy images from {images_from} to {images_to:?}")
         })?;
 
         Ok(())

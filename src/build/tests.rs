@@ -21,13 +21,13 @@ mod build_tests {
             ),
         ];
 
-        tests.into_iter().for_each(|(value, expect)| {
+        for (value, expect) in tests {
             let path = Path::new(value);
 
             assert_eq!(
                 get_html_file_path(path).expect("could not retrieve filename"),
                 expect
             );
-        });
+        }
     }
 }

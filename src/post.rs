@@ -5,7 +5,7 @@ use std::fs;
 /// Create a new generic post
 pub fn run(file_slug: &str, draft: bool) -> Result<()> {
     let now = chrono::offset::Utc::now().format("%Y-%m-%d");
-    let path = format!("posts/{}-{}.md", now, slug::slugify(file_slug));
+    let path = format!("posts/{now}-{}.md", slug::slugify(file_slug));
 
     println!(
         "{}",
@@ -16,7 +16,7 @@ pub fn run(file_slug: &str, draft: bool) -> Result<()> {
 title: I'm an amazing title
 description: I'm a short description of my amazing post
 published_at: 2022-11-01 13:42:37
-draft: {}
+draft: {draft}
 ---
 
 # Lorem ipsum dolor sit amet,
@@ -31,7 +31,7 @@ Phasellus eleifend at nunc a molestie :
 - Donec eleifend fermentum odio, a aliquam urna varius posuere.
 
 Vestibulum aliquet metus nulla, sit [amet ultrices dolor](index.html) sodales ac. Morbi risus quam, sagittis et augue eu, rhoncus imperdiet odio. Aenean ac condimentum ipsum.
-", draft);
+");
 
-    fs::write(&path, template).with_context(|| format!("Failed to write to path {}", path))
+    fs::write(&path, template).with_context(|| format!("Failed to write to path {path}"))
 }

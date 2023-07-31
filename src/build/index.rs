@@ -19,8 +19,8 @@ pub struct Index<'a> {
 }
 
 impl Index<'_> {
-    pub fn new<'a>(config: &'a Config, posts: &'a Posts) -> Result<Index<'a>> {
-        Ok(Index {
+    pub fn new<'a>(config: &'a Config, posts: &'a Posts) -> Index<'a> {
+        Index {
             title: &config.site_name,
             description: &config.description,
             canonical: &config.base_url,
@@ -28,7 +28,7 @@ impl Index<'_> {
             posts,
             seo: &config.seo,
             twitter: &config.twitter,
-        })
+        }
     }
 
     pub fn write<T: std::io::Write>(&self, mut writer: T, config: &Config) -> Result<usize> {
@@ -37,9 +37,8 @@ impl Index<'_> {
         let mut tt = TinyTemplate::new();
         tt.set_default_formatter(&format_unescaped);
         let template_path = &format!("./themes/{}/index.html", config.theme);
-        let template = fs::read_to_string(template_path).with_context(|| {
-            format!("Failed to read the template file at path {}", template_path)
-        })?;
+        let template = fs::read_to_string(template_path)
+            .with_context(|| format!("Failed to read the template file at path {template_path}"))?;
         tt.add_template("index", &template)
             .context("Failed to build the index template ")?;
 
