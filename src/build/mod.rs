@@ -35,7 +35,7 @@ pub fn run() -> Result<()> {
         let files = glob("posts/*.md")
             .context("Failed to read the md files at path posts/")?
             .par_bridge()
-            .filter_map(|res| res.ok())
+            .filter_map(Result::ok)
             .collect::<Vec<_>>();
 
         let mut posts = Posts::new(
@@ -45,14 +45,14 @@ pub fn run() -> Result<()> {
                 .collect::<Result<Vec<_>>>()
                 .context("Failed to generate the post")?
                 .into_iter()
-                .filter(|opt| opt.is_some())
+                .filter(Option::is_some)
                 .collect::<Option<Vec<_>>>()
                 .unwrap(),
         );
         posts.sort_date_desc();
 
         Assets::copy(config).context("Failed to copy the static assets")?;
-        Index::new(config, &posts)?
+        Index::new(config, &posts)
             .write(
                 &mut File::create(format!("{}/index.html", config.build_path.display()))
                     .context("Failed to generate the RSS feed")?,
@@ -102,7 +102,7 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Option<Post>> {
         .and_then(|contents| {
             MarkdownParser::new()
                 .parse(&contents, &config.locale)
-                .with_context(|| format!("Failed to parse the Markdown file at path {:?}", path))
+                .with_context(|| format!("Failed to parse the Markdown file at path {path:?}"))
         })?;
 
     if post.draft {
@@ -115,16 +115,10 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Option<Post>> {
     }
 
     post.canonical = get_canonical_url(&config.base_url, path).with_context(|| {
-        format!(
-            "Failed to generate the canonical url for the file at path {:?}",
-            path
-        )
+        format!("Failed to generate the canonical url for the file at path {path:?}")
     })?;
     post.path = get_html_file_path(path).with_context(|| {
-        format!(
-            "Failed to generate the html path for the file at path {:?}",
-            path
-        )
+        format!("Failed to generate the html path for the file at path {path:?}")
     })?;
 
     let p = generate_template(config, post.clone())
@@ -135,7 +129,7 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Option<Post>> {
             )
         })
         .and_then(|(html, post)| {
-            save(&config.build_path, post.clone(), html)
+            save(&config.build_path, post.clone(), &html)
                 .with_context(|| format!("Failed to save the file at path {}", post.path))
         })?;
 
@@ -148,7 +142,7 @@ fn generate_template(config: &Config, post: Post) -> Result<(String, Post)> {
 
     let template_path = &format!("./themes/{}/post.html", &config.theme);
     let template = fs::read_to_string(template_path)
-        .with_context(|| format!("Failed to read the template file at path {}", template_path))?;
+        .with_context(|| format!("Failed to read the template file at path {template_path}"))?;
     tt.add_template("post", &template).with_context(|| {
         format!(
             "Failed to build the template for the post at path {}",
@@ -184,15 +178,15 @@ fn get_html_file_path(path: &Path) -> Result<String> {
 }
 
 fn get_file_name(path: &Path) -> Result<String> {
-    Ok(path
-        .file_name()
-        .ok_or_else(|| anyhow!("Failed to retrieve filename at path {}", path.display(),))?
-        .to_str()
-        .ok_or_else(|| anyhow!("Empty filename at path {}", path.display()))?
-        .to_string())
+    Ok(String::from(
+        path.file_name()
+            .ok_or_else(|| anyhow!("Failed to retrieve filename at path {}", path.display(),))?
+            .to_str()
+            .ok_or_else(|| anyhow!("Empty filename at path {}", path.display()))?,
+    ))
 }
 
-fn save(build_path: &Path, post: Post, html: String) -> Result<Post> {
+fn save(build_path: &Path, post: Post, html: &str) -> Result<Post> {
     println!("{}", style(format!("Saving to {}...", &post.path)).dim());
 
     fs::write(

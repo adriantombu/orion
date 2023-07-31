@@ -23,7 +23,7 @@ pub fn run(path: &str) -> Result<()> {
     create_directories(path)?;
 
     Asset::iter().try_for_each(|file| {
-        let file_path = format!("{}/{}", path, file);
+        let file_path = format!("{path}/{file}");
         println!("{}", style(format!("Creating {}...", &file_path)).dim());
 
         fs::write(
@@ -39,14 +39,14 @@ pub fn run(path: &str) -> Result<()> {
 fn create_directories(path: &str) -> Result<()> {
     let paths = vec![
         path.to_string(),
-        format!("{}/posts", path),
-        format!("{}/static/images", path),
-        format!("{}/themes/orion", path),
-        format!("{}/themes/orion/assets", path),
+        format!("{path}/posts"),
+        format!("{path}/static/images"),
+        format!("{path}/themes/orion"),
+        format!("{path}/themes/orion/assets"),
     ];
 
     paths.iter().try_for_each(|path| {
         fs::create_dir_all(path)
-            .with_context(|| format!("Failed to create the directory at path {}", path))
+            .with_context(|| format!("Failed to create the directory at path {path}"))
     })
 }

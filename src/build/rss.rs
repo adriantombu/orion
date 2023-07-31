@@ -48,35 +48,36 @@ mod build_tests {
     use crate::build::post::{Post, Posts};
     use crate::build::rss::Rss;
     use crate::config::{Config, Seo, Twitter};
+    use chrono::DateTime;
+    use std::path::PathBuf;
 
     #[test]
     fn test_rss() {
         // TODO: create a test helper?
         let config = Config {
-            base_url: "https://adriantombu.github.io/orion/".to_string(),
-            site_name: "Orion".to_string(),
-            description: "A simple static blog generator made with Rust".to_string(),
-            theme: "orion".to_string(),
-            build_path: Default::default(),
-            locale: "en_US".to_string(),
+            base_url: String::from("https://adriantombu.github.io/orion/"),
+            site_name: String::from("Orion"),
+            description: String::from("A simple static blog generator made with Rust"),
+            theme: String::from("orion"),
+            build_path: PathBuf::default(),
+            locale: String::from("en_US"),
             seo: Seo {
-                robots: "index, follow".to_string(),
+                robots: String::from("index, follow"),
             },
             twitter: Twitter {
-                creator: "adriantombu".to_string(),
+                creator: String::from("adriantombu"),
             },
         };
         let posts = Posts::new(vec![Post {
-            title: "Lorem ipsum dolor sit amet".to_string(),
-            description: "Morbi sollicitudin libero nisi, eu luctus quam tristique sed."
-                .to_string(),
-            published_at: "".to_string(),
-            published_at_raw: Default::default(),
-            content: "<p>Suspendisse vel nibh venenatis, convallis turpis nec, aliquet nibh. Vivamus rhoncus sapien nibh.</p>".to_string(),
-            image: "https://placekitten.com/500/500".to_string(),
-            canonical: "https://adriantombu.github.io/orion/lorem-ipsum-dolor-sit-amet".to_string(),
-            path: "lorem-ipsum-dolor-sit-amet.html".to_string(),
-            locale: "fr-FR".to_string(),
+            title: String::from("Lorem ipsum dolor sit amet"),
+            description: String::from("Morbi sollicitudin libero nisi, eu luctus quam tristique sed."),
+            published_at: String::new(),
+            published_at_raw: DateTime::default(),
+            content: String::from("<p>Suspendisse vel nibh venenatis, convallis turpis nec, aliquet nibh. Vivamus rhoncus sapien nibh.</p>"),
+            image: String::from("https://placekitten.com/500/500"),
+            canonical: String::from("https://adriantombu.github.io/orion/lorem-ipsum-dolor-sit-amet"),
+            path: String::from("lorem-ipsum-dolor-sit-amet.html"),
+            locale: String::from("fr-FR"),
             draft: false
         }]);
         let mut result = Vec::new();
