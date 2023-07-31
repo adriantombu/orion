@@ -48,11 +48,7 @@ enum Commands {
     },
 
     /// Runs a local server to navigate the blog
-    Serve {
-        /// Set to true to generate the blog before launching the server
-        #[arg(short, long, default_value_t = false)]
-        build: bool,
-    },
+    Serve,
 }
 
 fn main() {
@@ -64,7 +60,7 @@ fn main() {
         }
         Commands::Build => build::run().context("Failed to build the blog"),
         Commands::Init { path } => init::run(&path).context("Failed to initialize a new project"),
-        Commands::Serve { build } => serve::run(build).context("Failed to serve the blog locally"),
+        Commands::Serve => serve::run().context("Failed to serve the blog locally"),
     };
 
     if let Err(err) = res {
