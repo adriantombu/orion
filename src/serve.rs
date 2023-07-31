@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use console::style;
 use notify::event::DataChange::Content;
 use notify::event::{RemoveKind, RenameMode};
-use notify::{Event, FsEventWatcher, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Event, RecommendedWatcher, RecursiveMode, Watcher};
 use rouille::Response;
 use std::path::{Path, PathBuf};
 
@@ -32,7 +32,7 @@ pub fn run() -> Result<()> {
     });
 }
 
-fn get_watcher() -> Result<FsEventWatcher> {
+fn get_watcher() -> Result<RecommendedWatcher> {
     Ok(RecommendedWatcher::new(
         move |res: Result<Event, notify::Error>| match res {
             Ok(event) => match event.kind {
