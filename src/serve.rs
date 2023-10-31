@@ -17,7 +17,7 @@ pub fn run() -> Result<()> {
     watcher.watch(Path::new("static"), RecursiveMode::Recursive)?;
     watcher.watch(Path::new("themes"), RecursiveMode::Recursive)?;
 
-    println!("{}", style("Listening to localhost:1337...").green());
+    println!("{}", style("Listening to http://localhost:1337...").green());
 
     let config = &Config::new().context("Failed to retrieve the configuration")?;
     let path = config.build_path.clone();

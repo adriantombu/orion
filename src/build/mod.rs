@@ -17,6 +17,7 @@ use crate::build::sitemap::Sitemap;
 use crate::build::types::TemplateData;
 use crate::Config;
 use anyhow::{anyhow, Context, Result};
+use chrono::Utc;
 use console::style;
 use glob::glob;
 use rayon::prelude::*;
@@ -105,10 +106,10 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Option<Post>> {
                 .with_context(|| format!("Failed to parse the Markdown file at path {path:?}"))
         })?;
 
-    if post.draft {
+    if post.draft || post.published_at_raw > Utc::now() {
         println!(
             "{}",
-            style(format!("{} is a draft, skipping...", &post.path))
+            style(format!("\"{}\" is a draft, skipping...", &post.title))
         );
 
         return Ok(None);
