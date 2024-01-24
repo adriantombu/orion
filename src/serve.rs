@@ -19,11 +19,9 @@ pub fn run() -> Result<()> {
 
     println!("{}", style("Listening to http://localhost:1337...").green());
 
-    let config = &Config::new().context("Failed to retrieve the configuration")?;
-    let path = config.build_path.clone();
-
+    let config = Config::new().context("Failed to retrieve the configuration")?;
     rouille::start_server("localhost:1337", move |request| {
-        let response = rouille::match_assets(request, &path);
+        let response = rouille::match_assets(request, &config.build_path);
         if response.is_success() {
             return response;
         }
@@ -62,7 +60,7 @@ fn get_watcher() -> Result<RecommendedWatcher> {
 }
 
 fn rebuild(paths: &[PathBuf], action: &str) {
-    if let Some(path) = paths.get(0) {
+    if let Some(path) = paths.first() {
         println!(
             "{}",
             style(format!(

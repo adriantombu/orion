@@ -32,7 +32,7 @@ pub fn run() -> Result<()> {
 
     let config = &Config::new().context("Failed to retrieve the configuration")?;
 
-    prepare_build_directory(&config.build_path).and_then(|_| {
+    prepare_build_directory(&config.build_path).and_then(|()| {
         let files = glob("posts/*.md")
             .context("Failed to read the md files at path posts/")?
             .par_bridge()
@@ -122,22 +122,22 @@ fn generate_file(config: &Config, path: &PathBuf) -> Result<Option<Post>> {
         format!("Failed to generate the html path for the file at path {path:?}")
     })?;
 
-    let p = generate_template(config, post.clone())
+    generate_template(config, &post)
         .with_context(|| {
             format!(
                 "Failed to generate the template for the post at path {}",
                 post.path
             )
         })
-        .and_then(|(html, post)| {
-            save(&config.build_path, post.clone(), &html)
+        .and_then(|html| {
+            save(&config.build_path, &post, &html)
                 .with_context(|| format!("Failed to save the file at path {}", post.path))
         })?;
 
-    Ok(Some(p))
+    Ok(Some(post))
 }
 
-fn generate_template(config: &Config, post: Post) -> Result<(String, Post)> {
+fn generate_template(config: &Config, post: &Post) -> Result<String> {
     let mut tt = TinyTemplate::new();
     tt.set_default_formatter(&format_unescaped);
 
@@ -151,22 +151,13 @@ fn generate_template(config: &Config, post: Post) -> Result<(String, Post)> {
         )
     })?;
 
-    Ok((
-        tt.render(
-            "post",
-            &TemplateData {
-                post: &post,
-                config,
-            },
-        )
+    tt.render("post", &TemplateData { post, config })
         .with_context(|| {
             format!(
                 "Failed to render the template for the post at path {}",
                 post.path
             )
-        })?,
-        post,
-    ))
+        })
 }
 
 fn get_canonical_url(base_url: &str, path: &Path) -> Result<String> {
@@ -187,7 +178,7 @@ fn get_file_name(path: &Path) -> Result<String> {
     ))
 }
 
-fn save(build_path: &Path, post: Post, html: &str) -> Result<Post> {
+fn save(build_path: &Path, post: &Post, html: &str) -> Result<()> {
     println!("{}", style(format!("Saving to {}...", &post.path)).dim());
 
     fs::write(
@@ -195,5 +186,5 @@ fn save(build_path: &Path, post: Post, html: &str) -> Result<Post> {
         html.as_bytes(),
     )?;
 
-    Ok(post)
+    Ok(())
 }

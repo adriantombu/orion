@@ -65,12 +65,12 @@ impl Sitemap {
         writer
             .create_element("urlset")
             .with_attribute(("xmlns", "https://www.sitemaps.org/schemas/sitemap/0.9"))
-            .write_inner_content(|writer| {
+            .write_inner_content::<_, quick_xml::Error>(|writer| {
                 urls.iter()
                     .try_for_each(|url| -> Result<()> {
                         writer
                             .create_element("url")
-                            .write_inner_content(|writer| {
+                            .write_inner_content::<_, quick_xml::Error>(|writer| {
                                 writer
                                     .create_element("loc")
                                     .write_text_content(BytesText::new(&url.loc))?;
@@ -99,7 +99,6 @@ impl Sitemap {
 
                         Ok(())
                     })
-                    // TODO: remove unwrap
                     .unwrap();
 
                 Ok(())
