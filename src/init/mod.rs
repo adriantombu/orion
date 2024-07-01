@@ -37,7 +37,7 @@ pub fn run(path: &str) -> Result<()> {
 }
 
 fn create_directories(path: &str) -> Result<()> {
-    let paths = vec![
+    let paths = [
         path.to_string(),
         format!("{path}/posts"),
         format!("{path}/static/images"),

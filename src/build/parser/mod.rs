@@ -15,7 +15,7 @@ pub struct ParsedData {
     pub description: String,
     pub published_at: String,
     pub image: Option<String>,
-    pub content: Option<String>,
     pub locale: Option<String>,
     pub draft: Option<bool>,
+    pub categories: Option<Vec<String>>,
 }

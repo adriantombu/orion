@@ -1,42 +1,42 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="{description}" />
-    <meta name="robots" content="{seo.robots}" />
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="{description}"/>
+    <meta name="robots" content="{seo.robots}"/>
 
-    <meta property="og:site_name" content="{title}" />
-    <meta property="og:locale" content="{locale}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" content="{title}" />
-    <meta property="og:url" content="{canonical}" />
-    <meta property="og:description" content="{description}" />
+    <meta property="og:site_name" content="{title}"/>
+    <meta property="og:locale" content="{locale}"/>
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="{title}"/>
+    <meta property="og:url" content="{canonical}"/>
+    <meta property="og:description" content="{description}"/>
 
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:creator" content="{twitter.creator}" />
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:creator" content="{twitter.creator}"/>
 
     <title>{title}</title>
 
-    <link rel="icon" href="./assets/favicon.png" />
-    <link rel="canonical" href="{canonical}" />
-    <link href="./assets/style.css" rel="stylesheet" type="text/css" />
-    <link href="./rss.xml" type="application/rss+xml" />
-  </head>
+    <link rel="icon" href="./assets/favicon.png"/>
+    <link rel="canonical" href="{canonical}"/>
+    <link href="./assets/style.css" rel="stylesheet" type="text/css"/>
+    <link href="./rss.xml" type="application/rss+xml"/>
+</head>
 
-  <body>
-    <header>
-      <nav><a href="/">Orion</a></nav>
-    </header>
+<body>
+<header>
+    <nav><a href="/">Orion</a></nav>
+</header>
 
-    <article>
-      <ul>
-        {{for post in posts}}
-          <li>
+<article>
+    <ul>
+        {{for post in posts.posts}}
+        <li>
             <small>.{post.published_at}</small> <a href="{post.path}">{post.title}</a>
-          </li>
+        </li>
         {{endfor}}
-      </ul>
-    </article>
-  </body>
+    </ul>
+</article>
+</body>
 </html>

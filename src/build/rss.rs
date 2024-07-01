@@ -2,7 +2,7 @@ use crate::build::post::Posts;
 use crate::config::Config;
 use anyhow::{Context, Result};
 use console::style;
-use rss::{Channel, ChannelBuilder, Item, ItemBuilder};
+use rss::{CategoryBuilder, Channel, ChannelBuilder, Item, ItemBuilder};
 
 // TODO: get rid of the rss crate and use a generic xml one
 #[derive(Debug)]
@@ -26,6 +26,12 @@ impl Rss {
                                 .link(p.canonical.to_string())
                                 .pub_date(p.published_at_raw.to_rfc2822())
                                 .content(p.content.to_string())
+                                .categories(
+                                    p.categories
+                                        .iter()
+                                        .map(|c| CategoryBuilder::default().name(c).build())
+                                        .collect::<Vec<_>>(),
+                                )
                                 .build()
                         })
                         .collect::<Vec<Item>>(),
@@ -78,7 +84,8 @@ mod build_tests {
             canonical: String::from("https://adriantombu.github.io/orion/lorem-ipsum-dolor-sit-amet"),
             path: String::from("lorem-ipsum-dolor-sit-amet.html"),
             locale: String::from("fr-FR"),
-            draft: false
+            draft: false,
+            categories: vec![String::from("tech"), String::from("rust")]
         }]);
         let mut result = Vec::new();
 

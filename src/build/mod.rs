@@ -46,17 +46,30 @@ pub fn run() -> Result<()> {
                 .collect::<Result<Vec<_>>>()
                 .context("Failed to generate the post")?
                 .into_iter()
-                .filter(Option::is_some)
-                .collect::<Option<Vec<_>>>()
-                .unwrap(),
+                .flatten()
+                .collect::<Vec<_>>(),
         );
         posts.sort_date_desc();
+
+        for category in &posts.categories {
+            Index::new(config, &posts.filter(category))
+                .write(
+                    &mut File::create(format!(
+                        "{}/category/{}.html",
+                        config.build_path.display(),
+                        category
+                    ))
+                    .context("Failed to generate the category file")?,
+                    config,
+                )
+                .context("Failed to generate the category page")?;
+        }
 
         Assets::copy(config).context("Failed to copy the static assets")?;
         Index::new(config, &posts)
             .write(
                 &mut File::create(format!("{}/index.html", config.build_path.display()))
-                    .context("Failed to generate the RSS feed")?,
+                    .context("Failed to create the index file")?,
                 config,
             )
             .context("Failed to generate the index page")?;
@@ -84,6 +97,13 @@ fn prepare_build_directory(build_path: &Path) -> Result<()> {
     }
 
     fs::create_dir_all(build_path).with_context(|| {
+        format!(
+            "Failed to create the directory at path {}",
+            build_path.display()
+        )
+    })?;
+
+    fs::create_dir_all(format!("{}/category", build_path.display())).with_context(|| {
         format!(
             "Failed to create the directory at path {}",
             build_path.display()
