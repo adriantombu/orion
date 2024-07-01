@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="{post.description}" />
-    <meta name="robots" content="{config.seo.robots}" />
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta name="description" content="{post.description}"/>
+    <meta name="robots" content="{config.seo.robots}"/>
 
-    <meta property="og:site_name" content="{config.site_name}" />
-    <meta property="og:locale" content="{config.locale}" />
-    <meta property="og:type" content="article" />
-    <meta property="og:title" content="{post.title}" />
-    <meta property="og:url" content="{post.canonical}" />
-    <meta property="og:image" content="{post.image}" />
-    <meta property="og:description" content="{post.description}" />
-    <meta property="article:published_time" content="{post.published_at_raw}" />
+    <meta property="og:site_name" content="{config.site_name}"/>
+    <meta property="og:locale" content="{config.locale}"/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:title" content="{post.title}"/>
+    <meta property="og:url" content="{post.canonical}"/>
+    <meta property="og:image" content="{post.image}"/>
+    <meta property="og:description" content="{post.description}"/>
+    <meta property="article:published_time" content="{post.published_at_raw}"/>
 
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:creator" content="{config.twitter.creator}" />
+    <meta name="twitter:card" content="summary"/>
+    <meta name="twitter:creator" content="{config.twitter.creator}"/>
 
     <title>{post.title} - {config.site_name}</title>
 
-    <link rel="icon" href="./assets/favicon.png" />
-    <link rel="canonical" href="{post.canonical}" />
-    <link href="./assets/style.css" rel="stylesheet" type="text/css" />
-    <link href="./rss.xml" type="application/rss+xml" />
-  </head>
+    <link rel="icon" href="./assets/favicon.png"/>
+    <link rel="canonical" href="{post.canonical}"/>
+    <link href="./assets/style.css" rel="stylesheet" type="text/css"/>
+    <link href="./rss.xml" type="application/rss+xml"/>
+</head>
 
-  <body>
-    <header>
-      <nav><a href="/">Orion</a></nav>
-    </header>
+<body>
+<header>
+    <nav><a href="/">Orion</a></nav>
+</header>
 
-    <article>
-      {post.content}
-    </article>
-  </body>
+<article>
+    {post.content}
+</article>
+</body>
 </html>
+

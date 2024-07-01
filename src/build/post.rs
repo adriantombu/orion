@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::Serialize;
+use std::collections::HashSet;
 use std::slice::Iter;
 
 #[derive(Debug, Serialize, Clone, Eq, PartialEq)]
@@ -14,21 +15,43 @@ pub struct Post {
     pub path: String,
     pub locale: String,
     pub draft: bool,
+    pub categories: Vec<String>,
 }
 
 #[derive(Debug, Serialize, Clone, Eq, PartialEq)]
-pub struct Posts(Vec<Post>);
+pub struct Posts {
+    pub categories: HashSet<String>,
+    posts: Vec<Post>,
+}
 
 impl Posts {
     pub fn new(posts: Vec<Post>) -> Self {
-        Self(posts)
+        let mut categories = HashSet::new();
+        posts.iter().for_each(|p| {
+            p.categories.iter().for_each(|c| {
+                categories.insert(c.to_string());
+            })
+        });
+
+        Self { categories, posts }
     }
 
     pub fn get(&self) -> Iter<Post> {
-        self.0.iter()
+        self.posts.iter()
+    }
+
+    pub fn filter(&self, category: &String) -> Self {
+        Self {
+            categories: self.categories.clone(),
+            posts: self
+                .get()
+                .filter(|p| p.categories.contains(category))
+                .cloned()
+                .collect::<Vec<_>>(),
+        }
     }
 
     pub fn sort_date_desc(&mut self) {
-        self.0.sort_by_key(|p| -p.published_at_raw.timestamp());
+        self.posts.sort_by_key(|p| -p.published_at_raw.timestamp());
     }
 }
