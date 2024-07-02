@@ -51,22 +51,10 @@ pub fn run() -> Result<()> {
         );
         posts.sort_date_desc();
 
-        for category in &posts.categories {
-            Index::new(config, &posts.filter(category))
-                .write(
-                    &mut File::create(format!(
-                        "{}/category/{}.html",
-                        config.build_path.display(),
-                        category
-                    ))
-                    .context("Failed to generate the category file")?,
-                    config,
-                )
-                .context("Failed to generate the category page")?;
-        }
+        generate_categories(&posts, config).context("Failed to generate the categories")?;
 
         Assets::copy(config).context("Failed to copy the static assets")?;
-        Index::new(config, &posts)
+        Index::new(config, &posts, &config.site_name)
             .write(
                 &mut File::create(format!("{}/index.html", config.build_path.display()))
                     .context("Failed to create the index file")?,
@@ -205,6 +193,28 @@ fn save(build_path: &Path, post: &Post, html: &str) -> Result<()> {
         format!("{}/{}", build_path.display(), post.path),
         html.as_bytes(),
     )?;
+
+    Ok(())
+}
+
+fn generate_categories(posts: &Posts, config: &Config) -> Result<()> {
+    for category in &posts.categories {
+        Index::new(
+            config,
+            &posts.filter(category),
+            &format!("#{} - {}", category, &config.site_name),
+        )
+        .write(
+            &mut File::create(format!(
+                "{}/category/{}.html",
+                config.build_path.display(),
+                category
+            ))
+            .context("Failed to generate the category file")?,
+            config,
+        )
+        .context("Failed to generate the category page")?;
+    }
 
     Ok(())
 }

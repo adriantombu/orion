@@ -19,9 +19,9 @@ pub struct Index<'a> {
 }
 
 impl Index<'_> {
-    pub fn new<'a>(config: &'a Config, posts: &'a Posts) -> Index<'a> {
+    pub fn new<'a>(config: &'a Config, posts: &'a Posts, title: &'a str) -> Index<'a> {
         Index {
-            title: &config.site_name,
+            title,
             description: &config.description,
             canonical: &config.base_url,
             locale: &config.locale,
