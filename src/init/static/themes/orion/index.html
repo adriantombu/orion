@@ -30,6 +30,13 @@
 </header>
 
 <article>
+    <nav class="categories">
+        |
+        {{for category in posts.categories}}
+        <a href="category/{category}.html">#{category}</a> |
+        {{endfor}}
+    </nav>
+
     <ul>
         {{for post in posts.posts}}
         <li>
