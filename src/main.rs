@@ -8,63 +8,85 @@ mod serve;
 
 use crate::config::Config;
 use anyhow::Context;
-use clap::{Parser, Subcommand};
-use console::style;
 
-/// A simple static blog generator
-#[derive(Debug, Parser)]
-#[clap(
-    author = "Adrian Tombu <adrian@otso.fr>",
-    version,
-    about = "A simple static blog generator",
-    long_about = "Write your post in Markdown and build them into a static HTML website"
-)]
-struct Cli {
-    #[clap(subcommand)]
-    command: Commands,
-}
+const HELP: &str = "\
+A simple static blog generator
 
-#[derive(Debug, Subcommand)]
-enum Commands {
-    /// Create a new empty post
-    #[clap(arg_required_else_help = true)]
-    Post {
-        /// The slug of the post
-        slug: String,
+Usage: orion-ssg <COMMAND>
 
-        /// Set to true to create the new post as a draft (it won't be published)
-        #[arg(short, long, default_value_t = false)]
-        draft: bool,
-    },
+Commands:
+  init --path my-blog                   Initialise a new Orion project
+  post --slug my-amazing-title --draft  Create a new empty post
+  build                                 Builds the blog to html
+  serve                                 Runs a local server to navigate the blog
 
-    /// Builds the blog to html
-    Build,
+Options:
+  -h, --help     Print help
+  -v, --version  Print version";
 
-    /// Initialise a new Orion project
-    #[clap(arg_required_else_help = true)]
-    Init {
-        /// Path of the new project
-        path: String,
-    },
+#[derive(Debug)]
+struct AppArgs {
+    /// The slug of the post
+    slug: Option<String>,
 
-    /// Runs a local server to navigate the blog
-    Serve,
+    /// Set to true to create the new post as a draft (it won't be published)
+    draft: Option<String>,
+
+    /// Path of the new project
+    path: Option<String>,
+    command: String,
 }
 
 fn main() {
-    let args = Cli::parse();
+    match parse_args() {
+        Ok(args) => {
+            match args.command.as_str() {
+                "post" => post::run(
+                    &args.slug.expect("--slug is required"),
+                    args.draft.unwrap_or_default() == "--draft",
+                )
+                .context("Failed to create a new post"),
 
-    let res = match args.command {
-        Commands::Post { slug, draft } => {
-            post::run(&slug, draft).context("Failed to create a new post")
+                "build" => build::run().context("Failed to build the blog"),
+
+                "init" => init::run(&args.path.expect("--path is required"))
+                    .context("Failed to initialize a new project"),
+
+                "serve" => serve::run().context("Failed to serve the blog locally"),
+
+                _ => {
+                    print!("{HELP}");
+                    std::process::exit(0);
+                }
+            }
+            .expect("TODO: panic message");
         }
-        Commands::Build => build::run().context("Failed to build the blog"),
-        Commands::Init { path } => init::run(&path).context("Failed to initialize a new project"),
-        Commands::Serve => serve::run().context("Failed to serve the blog locally"),
+        Err(e) => {
+            eprintln!("Error: {e}.");
+            std::process::exit(1);
+        }
+    }
+}
+
+fn parse_args() -> Result<AppArgs, pico_args::Error> {
+    let mut pargs = pico_args::Arguments::from_env();
+
+    if pargs.clone().finish().is_empty() || pargs.contains(["-h", "--help"]) {
+        print!("{HELP}");
+        std::process::exit(0);
+    }
+
+    if pargs.contains(["-v", "--version"]) {
+        print!("orion-ssg v{}", env!("CARGO_PKG_VERSION"));
+        std::process::exit(0);
+    }
+
+    let args = AppArgs {
+        slug: pargs.opt_value_from_str("--slug")?,
+        draft: pargs.opt_value_from_str("--draft")?,
+        path: pargs.opt_value_from_str("--path")?,
+        command: pargs.free_from_str()?,
     };
 
-    if let Err(err) = res {
-        eprintln!("{:?}", style(err).red());
-        std::process::exit(1);
-    }
+    Ok(args)
 }

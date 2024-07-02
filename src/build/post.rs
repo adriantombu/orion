@@ -27,11 +27,11 @@ pub struct Posts {
 impl Posts {
     pub fn new(posts: Vec<Post>) -> Self {
         let mut categories = HashSet::new();
-        posts.iter().for_each(|p| {
+        for p in &posts {
             p.categories.iter().for_each(|c| {
                 categories.insert(c.to_string());
-            })
-        });
+            });
+        }
 
         Self { categories, posts }
     }

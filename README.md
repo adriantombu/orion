@@ -4,15 +4,17 @@ Orion
 A static site generator written in Rust to create a simple blog from Markdown files.
 
 ### CLI Actions
-* `orion init [PATH]` : create a directory to start a new Orion blog (with a few fake posts)
-* `orion post [SLUG]` : create a new Markdown post
-* `orion build` : export the Markdown to html
-* `orion serve` : build, start a local server to test your build, and watch for changes on `/posts`, `/static` and `/themes`
-* `orion --version` : display the current version of Orion
 
-You can use the `--help` or `-h` flag for each action to know more
+* `orion init --path my-blog` : create a directory to start a new Orion blog (with a few fake posts)
+* `orion post --slug my-amazing-title --draft` : create a new Markdown post
+* `orion build` : export the Markdown to html
+* `orion serve` : build, start a local server to test your build, and watch for changes on `/posts`, `/static`
+  and `/themes`
+* `orion --version` : display the current version of Orion
+* `orion --help` : print the help
 
 ### Directory structure
+
 ```
 .
 ├── posts
@@ -39,9 +41,11 @@ The build directory (the files that will be deployed into production)
 All the assets you want to use (images for your posts, for example)
 
 `/themes`
-It contains the different themes you can use, each folder representing them with its own assets: html layout, css, images, ...
+It contains the different themes you can use, each folder representing them with its own assets: html layout, css,
+images, ...
 
 ### Front matter
+
 You can use the following values in your posts. They will be located at the top of the file in between `---`.
 
 ```
@@ -55,6 +59,6 @@ image: https://www.publicdomainpictures.net/pictures/220000/velka/orion-nebula.j
 The actual markdown content
 ```
 
-### Credits 
+### Credits
 
 The favicon was made by Denis Moskowitz from the [Noun Project](https://thenounproject.com/term/orion/868269/).
